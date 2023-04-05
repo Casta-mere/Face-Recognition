@@ -154,10 +154,12 @@ def reset():
     column_info=[]
     column_info.append(['id','int(11)'])
     column_info.append(['name','varchar(255)'])
+    column_info.append(['email','varchar(255)'])
 
-    info1=[1,'wxg']
-    info2=[2,'wyj']
-    info3=[3,'ljw']
+
+    info1=[1,'wxg','2287245796@qq.com']
+    info2=[2,'wyj','981193371@qq.com']
+    info3=[3,'ljw','1917871807@qq.com']
 
     tabname_entry="entry"
     column_entry=[]
@@ -185,11 +187,13 @@ def reset():
     db.add_entry(tabname_entry,entry2)
     db.add_entry(tabname_entry,entry3)
 
+
 def showlist(L):
     for i in L:
         for j in i:
             print(j,end=" ")
         print()
+
 
 if __name__=="__main__":
     reset()
@@ -198,4 +202,6 @@ if __name__=="__main__":
     showlist(l)
     db.update_entry("entry","id",1,"times","10:00:00")
     l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
+    showlist(l)
+    l=list(db.get_all_data("info"))
     showlist(l)
