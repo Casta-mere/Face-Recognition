@@ -64,7 +64,7 @@ class my_sql():
             column += i[0]+' '+i[1]+','
         return column[:-1]
 
-    def Update_table(self, table_name, item):
+    def add_entry(self, table_name, item):
         conn = pymysql.connect(host=host, user=user, password=password,
                                database=self.database_name, charset='utf8')
         cursor = conn.cursor()
@@ -73,6 +73,22 @@ class my_sql():
             if(type(i) == str):values += f'"{i}",'
             else:values += f'{i},'
         sql = f'insert into `{table_name}` values({values[:-1]});'
+        try:
+            cursor.execute(sql)
+            conn.commit()
+        except:
+            conn.rollback()
+            with open("err.txt", "a", encoding="utf-8")as f:
+                f.write(sql+"\n")
+            print("error")
+        cursor.close()
+        conn.close()
+
+    def update_entry(self,table_name,attr_name,attr_value,attr_name2,attr_value2):
+        conn = pymysql.connect(host=host, user=user, password=password,
+                               database=self.database_name, charset='utf8')
+        cursor = conn.cursor()
+        sql=f'update {table_name} set {attr_name2}="{attr_value2}" where {attr_name}="{attr_value}"'
         try:
             cursor.execute(sql)
             conn.commit()
@@ -134,28 +150,52 @@ class my_sql():
 
 
 def reset():
-    tabname="info"
-    column=[]
-    column.append(['id','int(11)'])
-    column.append(['name','varchar(255)'])
-    column.append(['date','date'])
-    column.append(['times','time'])
-    column.append(['timee','time'])
-    column.append(['bool','boolean'])
+    tabname_info="info"
+    column_info=[]
+    column_info.append(['id','int(11)'])
+    column_info.append(['name','varchar(255)'])
 
-    info1=[1,'zhangsan','2020-01-01','08:00:00','09:00:00',False]
-    info2=[2,'lisi','2020-01-01','08:00:00','09:00:00',False]
+    info1=[1,'wxg']
+    info2=[2,'wyj']
+    info3=[3,'ljw']
+
+    tabname_entry="entry"
+    column_entry=[]
+    column_entry.append(['id','int(11)'])
+    column_entry.append(['name','varchar(255)'])
+    column_entry.append(['date','date'])
+    column_entry.append(['times','time'])
+    column_entry.append(['timee','time'])
+    column_entry.append(['bool','boolean'])
+
+    entry1=[1,'wxg','2020-01-01','08:00:00','09:00:00',False]
+    entry2=[2,'wyj','2020-01-01','08:00:00','09:00:00',False]
+    entry3=[3,'ljw','2020-01-01','08:00:00','09:00:00',False]
 
     db=my_sql("facerecognition")
-    db.Create_table(tabname,column)
-    db.Update_table(tabname,info1)
-    db.Update_table(tabname,info2)
+
+    db.Create_Database()
+    db.Create_table(tabname_info,column_info)
+    db.add_entry(tabname_info,info1)
+    db.add_entry(tabname_info,info2)
+    db.add_entry(tabname_info,info3)
+
+    db.Create_table(tabname_entry,column_entry)
+    db.add_entry(tabname_entry,entry1)
+    db.add_entry(tabname_entry,entry2)
+    db.add_entry(tabname_entry,entry3)
+
+def showlist(L):
+    for i in L:
+        for j in i:
+            print(j,end=" ")
+        print()
 
 if __name__=="__main__":
-    # reset()
+    reset()
     db=my_sql("facerecognition")
-    l=list(db.get_all_data("info"))
-    for i in l:
-        for j in i:
-            print(j,type(j))
-        print()
+    l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
+    showlist(l)
+    db.update_entry("entry","id",1,"times","10:00:00")
+    l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
+    showlist(l)
