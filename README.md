@@ -43,3 +43,4 @@
 - [ ] 2.1 part3完成
 - [ ] 2.2 4个part待确认
 - [ ] 2.3 part2完成
+- [ ] 参数信息详见：https://www.tp-linkshop.com.cn/Products/Details/2261
