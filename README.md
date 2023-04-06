@@ -40,6 +40,4 @@
 - [ ] 考勤信息只需要正常/不正常，还是需要知道正常/迟到/早退/缺勤？
 
 # 文档编写记录
-- [ ] 2.1 part3完成
-- [ ] 2.2 4个part待确认
-- [ ] 2.3 part2完成
+- [ ] 参数信息详见：https://www.tp-linkshop.com.cn/Products/Details/2261
