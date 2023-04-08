@@ -41,3 +41,5 @@
 
 # 文档编写记录
 - [ ] 参数信息详见：https://www.tp-linkshop.com.cn/Products/Details/2261
+- [ ] 录入人脸：摄像头拍照
+- [ ] 打卡：进出打卡
