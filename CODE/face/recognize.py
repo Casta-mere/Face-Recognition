@@ -14,7 +14,8 @@ height = 0
 def get_video():
     global width, height, frame_stack
     # Initialize video capture from RTSP stream
-    cap = cv2.VideoCapture("rtsp://admin:a12345678@192.168.136.156:554/stream1")
+    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture("rtsp://admin:a12345678@192.168.57.157:554/stream1")
     # get the width and height of frame
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -37,9 +38,9 @@ def detect_faces():
     # Load face images from faceImg folder
     known_face_encodings = []
     known_face_names = []
-    pictures = len(os.listdir('faceImg'))
+    pictures = len(os.listdir('face-recognition/faceImg'))
     for i in range(1, pictures + 1):
-        img_path = f'faceImg/{i}.jpg'
+        img_path = f'face-recognition/faceImg/{i}.jpg'
         img = face_recognition.load_image_file(img_path)
         face_encoding = face_recognition.face_encodings(img)[0]
         known_face_encodings.append(face_encoding)

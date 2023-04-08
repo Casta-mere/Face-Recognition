@@ -1,10 +1,14 @@
 import cv2
 import face_recognition
 import os
+
+dir='face/faceImg'
+
 def addface():
     # Initialize OpenCV video capture
-   # video_capture = cv2.VideoCapture(0)
-    video_capture = cv2.VideoCapture("rtsp://admin:a12345678@192.168.136.156:554/stream1")
+    video_capture = cv2.VideoCapture(0)
+
+    # video_capture = cv2.VideoCapture("rtsp://admin:a12345678@192.168.136.156:554/stream1")
     # Take picture using video capture
     ret, frame = video_capture.read()
     target_size = (1080, 1080)
@@ -18,12 +22,12 @@ def addface():
         frame = frame[top-10:bottom+10, left-10:right+10]
     # If no faces are detected, return
     if not face_locations:
-        print("No face detected")
-        return
+        return "No face detected"
+        
     # Save the face encoding to a file in the faceImg directory
-    num_faces = len(os.listdir('faceImg'))
+    num_faces = len(os.listdir(dir))
     filename = f'{num_faces + 1}.jpg'
-    filepath = os.path.join('faceImg', filename)
+    filepath = os.path.join(dir, filename)
     cv2.imwrite(filepath, frame)
     print(f"New face added: {filename}")
 
