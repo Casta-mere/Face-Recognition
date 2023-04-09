@@ -2,7 +2,8 @@ import cv2
 import face_recognition
 import os
 
-dir='face/faceImg'
+dir = 'face/faceImg'
+
 
 def addface(userid):
     # Initialize OpenCV video capture
@@ -14,7 +15,7 @@ def addface(userid):
         print("Video capture initialized")
     else:
         return "Error initializing video capture"
-    
+
     # Take picture using video capture
     ret, frame = video_capture.read()
     target_size = (1080, 1080)
@@ -26,16 +27,17 @@ def addface(userid):
     # just get the face from the frame with a margin of 10 pixels
     for (top, right, bottom, left) in face_locations:
         frame = frame[top-10:bottom+10, left-10:right+10]
-   
+
     # If no faces are detected, return
     if not face_locations:
         return "No face detected"
-        
+
     # Save the face encoding to a file in the faceImg directory
     filename = f'{userid}.jpg'
     filepath = os.path.join(dir, filename)
     cv2.imwrite(filepath, frame)
     return f"New face added: {filename}"
+
 
 if __name__ == "__main__":
     print(addface(1))
