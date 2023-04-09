@@ -121,7 +121,7 @@ class my_sql():
         data = cursor.fetchall()
         cursor.close()
         conn.close()
-        return list(data)
+        return data
 
     def get_all_data_by_sepecific_attribute_value(self, table_name, attr_name, attr_value):
         conn = pymysql.connect(host=host, user=user, password=password,
@@ -132,7 +132,7 @@ class my_sql():
         data = cursor.fetchall()
         cursor.close()
         conn.close()
-        return list(data)
+        return data
 
     def get_attributes_by_sepecific_attribute_value(self, table_name, attr_name, attr_value, attribute):
         conn = pymysql.connect(host=host, user=user, password=password,
@@ -146,8 +146,17 @@ class my_sql():
         data = cursor.fetchall()
         cursor.close()
         conn.close()
-        return list(data)
+        return data
 
+    def get_newest_data(self, table_name,id):
+        conn = pymysql.connect(host=host, user=user, password=password,
+                               database=self.database_name, charset='utf8')
+        cursor = conn.cursor()
+        cursor.execute(f'select * from {table_name} where id={id} order by date desc,times desc limit 1')
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return data
 
 def reset():
     tabname_info="info"
@@ -196,12 +205,18 @@ def showlist(L):
 
 
 if __name__=="__main__":
-    reset()
+    # reset()
     db=my_sql("facerecognition")
-    l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
-    showlist(l)
-    db.update_entry("entry","id",1,"times","10:00:00")
-    l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
-    showlist(l)
-    l=list(db.get_all_data("info"))
-    showlist(l)
+    
+    # print(db.get_newest_data("entry",2))
+    showlist(db.get_newest_data("entry",3))
+    # info=entry2=[3,'ljw','2022-01-01','08:00:00','',True]
+    # db.add_entry("entry",info)
+
+    # l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
+    # showlist(l)
+    # db.update_entry("entry","id",1,"times","10:00:00")
+    # l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
+    # showlist(l)
+    # l=list(db.get_all_data("info"))
+    # showlist(l)
