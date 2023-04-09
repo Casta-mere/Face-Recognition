@@ -6,6 +6,7 @@ import threading
 import os
 
 class control():
+
     def __init__(self):
         self.database=database.my_sql('facerecognition')
         # self.mail=mail()
@@ -19,7 +20,6 @@ class control():
         l=list(self.database.get_all_data('info'))
         for i in l:
             self.info[i[0]]=[i[1],i[2]]
-        # print(list(self.info.keys()))
         
     def time(self):
         nowdate=time.strftime('%Y-%m-%d',time.localtime())
@@ -29,7 +29,6 @@ class control():
     def renew_status(self):
         for i in list(self.info.keys()):
             self.user_status[i]=bool(list(self.database.get_newest_data('entry',i))[0][-1])
-        # print(self.user_status)
 
     def getin(self,userid):
         d,t=self.time()
@@ -48,11 +47,18 @@ class control():
         else:
             self.getin(userid)
 
+    def addface(self):
+        userid=list(self.info.keys())[-1]+1
+        print(userid)
+        addface.addface(userid)
+    
+    def updatefaceinfo(self,userid,name,email):
+        info=[userid,name,email]
+        self.database.add_entry('info',info)
+
 
 # print(addface.addface())
 if __name__ == "__main__":
     os.system('cls')
     c=control()
-    c.check(1)
-    time.sleep(5)
-    c.check(1)
+    c.addface()
