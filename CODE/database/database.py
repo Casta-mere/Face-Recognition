@@ -84,11 +84,11 @@ class my_sql():
         cursor.close()
         conn.close()
 
-    def update_entry(self,table_name,attr_name,attr_value,attr_name2,attr_value2):
+    def update_entry(self,id,timee):
         conn = pymysql.connect(host=host, user=user, password=password,
                                database=self.database_name, charset='utf8')
         cursor = conn.cursor()
-        sql=f'update {table_name} set {attr_name2}="{attr_value2}" where {attr_name}="{attr_value}"'
+        sql=f'update entry set timee="{timee}",bool = 0 where id ="{id}" and bool = 1;'
         try:
             cursor.execute(sql)
             conn.commit()
@@ -166,9 +166,9 @@ def reset():
     column_info.append(['email','varchar(255)'])
 
 
-    info1=[1,'wxg','2287245796@qq.com']
-    info2=[2,'wyj','981193371@qq.com']
-    info3=[3,'ljw','1917871807@qq.com']
+    info1=[1,'王旭刚','2287245796@qq.com']
+    info2=[2,'韦杨婧','981193371@qq.com']
+    info3=[3,'刘俊伟','1917871807@qq.com']
 
     tabname_entry="entry"
     column_entry=[]
@@ -179,9 +179,9 @@ def reset():
     column_entry.append(['timee','time'])
     column_entry.append(['bool','boolean'])
 
-    entry1=[1,'wxg','2020-01-01','08:00:00','09:00:00',False]
-    entry2=[2,'wyj','2020-01-01','08:00:00','09:00:00',False]
-    entry3=[3,'ljw','2020-01-01','08:00:00','09:00:00',False]
+    entry1=[1,'王旭刚','2020-01-01','08:00:00','09:00:00',False]
+    entry2=[2,'韦杨婧','2020-01-01','08:00:00','09:00:00',False]
+    entry3=[3,'刘俊伟','2020-01-01','08:00:00','09:00:00',False]
 
     db=my_sql("facerecognition")
 
@@ -205,17 +205,17 @@ def showlist(L):
 
 
 if __name__=="__main__":
-    # reset()
-    db=my_sql("facerecognition")
+    reset()
+    # db=my_sql("facerecognition")
     
     # print(db.get_newest_data("entry",2))
-    showlist(db.get_newest_data("entry",3))
+    # showlist(db.get_newest_data("entry",3))
     # info=entry2=[3,'ljw','2022-01-01','08:00:00','',True]
     # db.add_entry("entry",info)
 
     # l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
     # showlist(l)
-    # db.update_entry("entry","id",1,"times","10:00:00")
+    # db.update_entry(1,"18:00:00")
     # l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
     # showlist(l)
     # l=list(db.get_all_data("info"))
