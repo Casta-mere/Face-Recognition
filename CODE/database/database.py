@@ -84,11 +84,11 @@ class my_sql():
         cursor.close()
         conn.close()
 
-    def update_entry(self,table_name,attr_name,attr_value,attr_name2,attr_value2):
+    def update_entry(self,id,timee):
         conn = pymysql.connect(host=host, user=user, password=password,
                                database=self.database_name, charset='utf8')
         cursor = conn.cursor()
-        sql=f'update {table_name} set {attr_name2}="{attr_value2}" where {attr_name}="{attr_value}"'
+        sql=f'update entry set timee="{timee}",bool = 0 where id ="{id}" and bool = 1;'
         try:
             cursor.execute(sql)
             conn.commit()
@@ -215,7 +215,7 @@ if __name__=="__main__":
 
     # l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
     # showlist(l)
-    # db.update_entry("entry","id",1,"times","10:00:00")
+    db.update_entry(1,"18:00:00")
     # l=list(db.get_all_data_by_sepecific_attribute_value("entry",'id',1))
     # showlist(l)
     # l=list(db.get_all_data("info"))
