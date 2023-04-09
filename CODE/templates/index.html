@@ -20,14 +20,19 @@
       <div class="container-fluid">
         <nav class="navbar navbar-expand-lg custom_nav-container ">
           <a class="navbar-brand" href="/">
-            <span>
+            <span style="text-align:center">
               Camera Preview
             </span>
           </a>
         </nav>
       </div>
     </header>
-    <video id="video-preview" width="640" height="480" autoplay></video>
+    <section class="catagory_section layout_padding">
+      <div class="row">
+        <!--a标签的样式已经被改成跟button差不多的玩意儿了-->
+        <video class = "m-auto" id="video-preview" autoplay></video>
+      </div>
+    </section>
     <script src='static/js/camera.js'></script>
   </body>
 </html>
