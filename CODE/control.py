@@ -2,9 +2,11 @@ from database import database
 # from mail import mail
 from face import addface
 import time
+import datetime
 import threading
 import os
 
+time_sep=500 # 间隔时间
 class control():
 
     def __init__(self):
@@ -28,7 +30,13 @@ class control():
 
     def renew_status(self):
         for i in list(self.info.keys()):
-            self.user_status[i]=bool(list(self.database.get_newest_data('entry',i))[0][-1])
+            l=list(self.database.get_newest_data('entry',i))[0]
+            status=bool(l[-1])
+            if(status):
+                nowtime=datetime.datetime.strptime(str(l[3]), '%H:%M:%S')
+            else:
+                nowtime=datetime.datetime.strptime(str(l[4]), '%H:%M:%S')
+            self.user_status[i]=[status,nowtime]
 
     def getin(self,userid):
         d,t=self.time()
@@ -41,11 +49,46 @@ class control():
         self.database.update_entry(userid,t)
         self.renew_status()
 
-    def check(self,userid):
-        if self.user_status[userid]:
-            self.getout(userid)
+    def is_valid(self,userid):
+        lasttime=self.user_status[userid][1]
+        # print(lasttime,type(lasttime))
+        d,t=self.time()
+        nowtime=datetime.datetime.strptime(t, '%H:%M:%S')
+        dalta=nowtime-lasttime
+        dalta=int(dalta.total_seconds())
+        # print(dalta,type(dalta))
+
+        if dalta>time_sep:
+            return True
         else:
+            return False
+        pass
+
+    def check(self,userid):
+        valid=self.is_valid(userid)
+        status=self.user_status[userid][0]
+
+        if(not valid and status):
+            return f"{self.info[userid][0]}请勿重复签到"
+        elif(not valid and not status):
+            return f"{self.info[userid][0]}请勿重复签退"
+        elif(valid and status):
+            self.getout(userid)
+            return f"{self.info[userid][0]}签退成功"
+        elif(valid and not status):
             self.getin(userid)
+            return f"{self.info[userid][0]}签到成功"
+
+        # if self.user_status[userid][0]:
+        #     if self.is_valid(userid):
+        #         self.getout(userid)
+        #         return f"{self.info[userid][0]}签退成功"
+        #     return f"{self.info[userid][0]}请勿重复签到"
+        # else:
+        #     if self.is_valid(userid):
+        #         self.getin(userid)
+        #         return f"{self.info[userid][0]}签到成功"
+        #     return f"{self.info[userid][0]}请勿重复签退"
 
     def addface(self):
         userid=list(self.info.keys())[-1]+1
@@ -61,4 +104,19 @@ class control():
 if __name__ == "__main__":
     os.system('cls')
     c=control()
-    c.addface()
+    # c.addface()
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
+    # time.sleep(6)
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
+    # time.sleep(6)
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
+    # print(c.check(1))
