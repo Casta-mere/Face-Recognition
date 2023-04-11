@@ -36,7 +36,7 @@ def addface(userid):
     filename = f'{userid}.jpg'
     filepath = os.path.join(dir, filename)
     cv2.imwrite(filepath, frame)
-    return f"New face added: {filename}"
+    return f"New face added: userid:{userid}"
 
 
 if __name__ == "__main__":

@@ -80,20 +80,27 @@ class control():
             self.getin(userid)
             return f"{self.info[userid][0]}签到成功"
 
-    def addface(self):
+    def adduser(self, name, email):
         userid = list(self.info.keys())[-1]+1
         print(userid)
-        addface.addface(userid)
-
-    def updatefaceinfo(self, userid, name, email):
+        print(addface.addface(userid))
         info = [userid, name, email]
         self.database.add_entry('info', info)
+
+        self.load_info()
+        self.getin(userid)
+        self.getout(userid)
+        self.renew_status()
+
+    
+        
 
 
 # print(addface.addface())
 if __name__ == "__main__":
     os.system('cls')
     c = control()
+    # c.adduser("test", "test")
     # c.addface()
     # print(c.check(1))
     # print(c.check(1))
