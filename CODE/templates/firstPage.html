@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <link rel="icon" href="/static/images/favicon.png" type="image/gif" />
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+
+  <title>Read-Book</title>
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+  <!-- font awesome style -->
+  <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+
+  <!-- Custom styles for this template -->
+  <link href="/static/css/style.css" rel="stylesheet" />
+  <!-- responsive style -->
+  <link href="/static/css/responsive.css" rel="stylesheet" />
+  <script src="/static/js/jquery-3.4.1.min.js"></script>
+
+</head>
+
+<body class="sub_page">
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $(".img-box").click(function(){
+        $(".img-box").removeClass('selected');  
+        $(this).addClass('selected'); 
+        $(".img-box").removeAttr("name");  
+        $(this).attr('name','selected'); 
+      });
+  });
+  </script>
+        
+  <div class="hero_area">
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="/">
+            <span>
+              Read-Book
+            </span>
+          </a>
+
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+  </div>
+
+
+  <!-- catagory section -->
+
+  <section id="s0" class="catagory_section layout_padding">
+    <div class="catagory_container">
+      <div class="container ">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="btn-box">
+                    <!--a标签的样式已经被改成跟button差不多的玩意儿了-->
+                    <a href="/imgUpload">录入人脸</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-box">
+                    <!--a标签的样式已经被改成跟button差不多的玩意儿了-->
+                    <a href="/imgUpload">录入人脸</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-box">
+                    <!--a标签的样式已经被改成跟button差不多的玩意儿了-->
+                    <a href="/imgUpload">录入人脸</a>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- end catagory section -->
+
+  <!-- info section -->
+
+  <!-- footer section -->
+  <script>
+    function subscribe() {
+      alert("Subscribe Success!");
+    }
+  </script>
+
+  <script>
+    function selected() {
+      var arr1 = [];
+      $(".selected").each(function(){
+        var va1 = $(this).attr('value');
+        arr1.push(va1);
+      });
+      if (arr1.length == 0) {
+        alert("Please select one category!");
+      } else {
+        $.get('/testSelected', JSON.stringify({"selected":arr1}), function(data){
+          ;$(window).attr("location","/testStart");
+        },"text");
+      }      
+    }
+  </script>
+
+
+
+  <!-- jQery -->
+  <script src="/static/js/jquery-3.4.1.min.js"></script>
+  <!-- bootstrap js -->
+  <script src="/static/js/bootstrap.js"></script>
+  <!-- custom js -->
+  <script src="/static/js/custom.js"></script>
+
+</body>
+
+</html>
