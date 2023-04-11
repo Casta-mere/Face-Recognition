@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>实验室打卡系统</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/static/css/style.css" rel="stylesheet" />
+    <link href="/static/css/responsive.css" rel="stylesheet" />
+  </head>
+
+  <body class="sub_page">
+
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="/">
+            <span>实验室打卡系统</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="contact_section layout_padding">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3 ">
+            <div class="heading_container ">
+              <h2 class="">请输入姓名：</h2>
+            </div>
+          </div>
+          <div class="col-md-5 ">
+            <form action="/validation" method="post">
+              <div id="id" name="id">
+                <input id="id" name="id" value="{{id}}" type="text" placeholder="姓名" />
+              </div>
+            </form>
+          </div>
+          <div class="col-md-2">
+            <div class="btn-box">
+              <button onclick="turnBack()">查看</button>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="btn-box">
+              <button onclick="turnBack()">返回</button>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact_section layout_padding">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <div id="nameReg" name="nameReg">
+              <input id="nameReg" name="nameReg" value="{{nameReg}}" type="text" placeholder="姓名" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div id="emailReg" name="emailReg">
+              <input id="emailReg" name="emailReg" value="{{emailReg}}" type="text" placeholder="邮箱" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      function subscribe() {
+        alert("Subscribe Success!");
+      }
+    </script>
+    <script>
+      function turnBack() {
+        window.location.href = "/";
+      }
+    </script>
+    <script src="static/js/jquery-3.4.1.min.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <script src="static/js/custom.js"></script>
+
+  </body>
+
+</html>

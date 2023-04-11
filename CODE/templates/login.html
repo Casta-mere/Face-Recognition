@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>实验室打卡系统</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+        <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="/static/css/style.css" rel="stylesheet" />
+        <link href="/static/css/responsive.css" rel="stylesheet" />
+    </head>
+
+    <body class="sub_page">
+
+        <header class="header_section">
+            <div class="container-fluid">
+                <nav class="navbar navbar-expand-lg custom_nav-container ">
+                    <a class="navbar-brand" href="/">
+                        <span>
+                        实验室打卡系统
+                        </span>
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <section class="contact_section layout_padding">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 ">
+                        <div class="heading_container ">
+                            <h2 class="">
+                                请输入管理员密码
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <form action="/loginCheck" method="post">
+                            <div id="pw" name="pw">
+                                <input id="pw" name="pw" value="{{pw}}" type="password" placeholder="密码" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="btn-box">
+                            <a href="/loginCheck">
+                                <button>登录</button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <br>
+                            {%if retry== 1%}<h6>密码错误！请重新输入</h6>{%endif%}
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            function subscribe() {
+            alert("Subscribe Success!");
+            }
+        </script>
+        <script src="static/js/jquery-3.4.1.min.js"></script>
+        <script src="static/js/bootstrap.js"></script>
+        <script src="static/js/custom.js"></script>
+
+    </body>
+</html>
