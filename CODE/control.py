@@ -20,7 +20,12 @@ class control():
         self.load_info()
         self.renew_status()
 
+    def get_id(self, username):
+        dict = {v[0]: k for k, v in self.info.items()}
+        return dict[username]
+
     def load_info(self):
+        self.info = {}
         l = list(self.database.get_all_data('info'))
         for i in l:
             self.info[i[0]] = [i[1], i[2]]
@@ -31,6 +36,7 @@ class control():
         return nowdate, nowtime
 
     def renew_status(self):
+        self.user_status = {}
         for i in list(self.info.keys()):
             l = list(self.database.get_newest_data('entry', i))[0]
             status = bool(l[-1])
@@ -43,12 +49,12 @@ class control():
     def getin(self, userid):
         d, t = self.now_time()
         entry = [userid, self.info[userid][0], d, t, '', True]
-        self.database.add_entry('entry', entry)
+        self.database.add_new_entry('entry', entry)
         self.renew_status()
 
     def getout(self, userid):
         d, t = self.now_time()
-        self.database.update_entry(userid, t)
+        self.database.update_table_entry(userid, t)
         self.renew_status()
 
     def is_valid(self, userid):
@@ -80,20 +86,41 @@ class control():
             self.getin(userid)
             return f"{self.info[userid][0]}签到成功"
 
-    def addface(self):
+    def adduser(self, name, email):
         userid = list(self.info.keys())[-1]+1
-        print(userid)
-        addface.addface(userid)
+        state, msg = addface.addface(userid)
+        # state, msg = addface.addface_frompic(userid)
 
-    def updatefaceinfo(self, userid, name, email):
+        if(not state):
+            return msg
         info = [userid, name, email]
-        self.database.add_entry('info', info)
+        self.database.add_new_entry('info', info)
+
+        self.load_info()
+        self.getin(userid)
+        self.getout(userid)
+        self.renew_status()
+        return msg
+
+    def deleteuser(self, username):
+        try:
+            userid = self.get_id(username)
+        except:
+            return f'FAIL : user "{username}" not exist'
+
+        self.database.delete_table_entry('info', userid)
+        self.database.delete_table_entry('entry', userid)
+        self.load_info()
+        self.renew_status()
+        return addface.deleteface(userid)
 
 
 # print(addface.addface())
 if __name__ == "__main__":
     os.system('cls')
     c = control()
+    print(c.adduser("test", "test"))
+    print(c.deleteuser("test"))
     # c.addface()
     # print(c.check(1))
     # print(c.check(1))

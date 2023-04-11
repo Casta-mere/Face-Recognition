@@ -41,9 +41,9 @@ def detect_faces():
     # Load face images from faceImg folder
     known_face_encodings = []
     known_face_names = []
-    pictures = len(os.listdir('face-recognition/faceImg'))
+    pictures = len(os.listdir('face/faceImg'))
     for i in range(1, pictures + 1):
-        img_path = f'face-recognition/faceImg/{i}.jpg'
+        img_path = f'face/faceImg/{i}.jpg'
         img = face_recognition.load_image_file(img_path)
         face_encoding = face_recognition.face_encodings(img)[0]
         known_face_encodings.append(face_encoding)
@@ -77,9 +77,9 @@ def detect_faces():
                 face_distances = face_recognition.face_distance(
                     known_face_encodings, face_encoding)
                 best_match_index = np.argmin(face_distances)
-                # calculate confidence,if confidence is higher than 0.5, call response function with state = True
+                # calculate confidence,if confidence is higher than 0.6, call response function with state = True
                 confidence = 1 - face_distances[best_match_index]
-                if matches[best_match_index] and confidence > 0.5:
+                if matches[best_match_index] and confidence > 0.6:
                     name = known_face_names[best_match_index]
                     response(True, name, confidence)
                 else:
