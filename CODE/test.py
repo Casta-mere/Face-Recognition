@@ -27,12 +27,22 @@ def receive_image():
         img_np = numpy.fromstring(img, dtype='uint8')
         new_img_np = cv2.imdecode(img_np, 1)
         try:
-            cv2.imwrite('./image/rev_image.jpg',new_img_np)
+            cv2.imwrite('./CODE/image/rev_image.jpg',new_img_np)
             print('data:{}'.format('success'))
         except:
             print('data:{}'.format('failed'))
         
     return 'upload'
+
+@app.route('/sendInfo',methods=['POST'])
+def sendInfo():
+    data=request.form.to_dict()
+    print(type(data))
+    print(data)
+    name=data['name']
+    email=data['email']
+    print('name:{}'.format(name),'email:{}'.format(email))
+    return redirect(url_for('hello_world'))
  
 if __name__ == '__main__':
  

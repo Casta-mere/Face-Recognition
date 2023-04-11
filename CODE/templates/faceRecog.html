@@ -16,16 +16,84 @@
 </head>
 <body>
 
-    <video id="video" autoplay="autoplay"></video>
-    <canvas id="canvas" width="50%" height="50%"></canvas>
-    <br>
-    <input type="button" title="开启摄像头" value="开启摄像头" onclick="getMedia()" />
-    <button id="close" onclick="closeMedia()">关闭摄像头</button>
-    <button id="return" onclick="turnBack()">返回</button>
-    <button id="upload" onclick="uploadImage()">拍照上传</button>
+    <section class="contact_section layout_padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                    <video id="video" autoplay="autoplay"></video>
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                    <canvas id="canvas" width="50%" height="50%"></canvas>
+                </div>
+                <br>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="btn-box">
+                        <button value="开启摄像头" onclick="getMedia()">开启摄像头</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-box">
+                        <button id="close" onclick="closeMedia()">关闭摄像头</button>
+                        
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-box">
+                        <button id="return" onclick="turnBack()">返回</button>
+                        
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-box">
+                        <button id="upload" onclick="uploadImage()">拍照上传</button>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact_section layout_padding">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6 ">
+              <div class="heading_container ">
+                <h2 class="">
+                  请输入个人信息：
+                </h2>
+              </div>
+              <form action="/sendInfo" method="post">
+                <div id="name" name="name">
+                  <input id="name" name="name" value="{{name}}" type="text" placeholder="姓名" />
+                </div>
+                <div id="email" name="email">
+                  <input id="email" name="email" value="{{email}}" type="email" placeholder="邮箱" />
+                </div>
+                <div class="btn-box">
+                  <a href="/sendInfo">
+                    <button>
+                      SEND
+                    </button>
+                  </a>
+                </div>
+                <div>
+                  <br>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
     <script src='static/js/camera.js'></script>
     <script src='static/js/jquery-1.7.1.min.js'></script>
-
+    
     <script>
         function closeMedia() {
                 var video = document.getElementById('video');
