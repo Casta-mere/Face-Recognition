@@ -38,6 +38,11 @@ def addface(userid):
     cv2.imwrite(filepath, frame)
     return f"New face added: userid:{userid}"
 
+def deleteface(userid):
+    filename = f'{userid}.jpg'
+    filepath = os.path.join(dir, filename)
+    os.remove(filepath)
+    return f"Face removed: userid:{userid}"
 
 if __name__ == "__main__":
     print(addface(1))

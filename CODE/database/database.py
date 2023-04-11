@@ -67,7 +67,7 @@ class my_sql():
             column += i[0]+' '+i[1]+','
         return column[:-1]
 
-    def add_entry(self, table_name, item):
+    def add_new_entry(self, table_name, item):
         conn = pymysql.connect(host=host, user=user, password=password,
                                database=self.database_name, charset='utf8')
         cursor = conn.cursor()
@@ -89,11 +89,27 @@ class my_sql():
         cursor.close()
         conn.close()
 
-    def update_entry(self, id, timee):
+    def update_table_entry(self, id, timee):
         conn = pymysql.connect(host=host, user=user, password=password,
                                database=self.database_name, charset='utf8')
         cursor = conn.cursor()
         sql = f'update entry set timee="{timee}",bool = 0 where id ="{id}" and bool = 1;'
+        try:
+            cursor.execute(sql)
+            conn.commit()
+        except:
+            conn.rollback()
+            with open("err.txt", "a", encoding="utf-8")as f:
+                f.write(sql+"\n")
+            print("error")
+        cursor.close()
+        conn.close()
+
+    def delete_table_entry(self, table_name, id):
+        conn = pymysql.connect(host=host, user=user, password=password,
+                               database=self.database_name, charset='utf8')
+        cursor = conn.cursor()
+        sql = f'delete from {table_name} where id ="{id}"'
         try:
             cursor.execute(sql)
             conn.commit()
@@ -193,14 +209,14 @@ def reset():
 
     db.Create_Database()
     db.Create_table(tabname_info, column_info)
-    db.add_entry(tabname_info, info1)
-    db.add_entry(tabname_info, info2)
-    db.add_entry(tabname_info, info3)
+    db.add_new_entry(tabname_info, info1)
+    db.add_new_entry(tabname_info, info2)
+    db.add_new_entry(tabname_info, info3)
 
     db.Create_table(tabname_entry, column_entry)
-    db.add_entry(tabname_entry, entry1)
-    db.add_entry(tabname_entry, entry2)
-    db.add_entry(tabname_entry, entry3)
+    db.add_new_entry(tabname_entry, entry1)
+    db.add_new_entry(tabname_entry, entry2)
+    db.add_new_entry(tabname_entry, entry3)
 
 
 def showlist(L):
