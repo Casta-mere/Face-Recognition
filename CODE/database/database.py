@@ -14,6 +14,25 @@ class my_sql():
 
     def __init__(self, database_name):
         self.database_name = database_name
+        state,msg=self.initial()
+        print(msg)
+        if(not state):
+            exit(0)
+
+    def initial(self):
+        try:
+            conn = pymysql.connect(host=host, user=user,
+                                   password=password, charset='utf8')
+        except:
+            return False,"FAIL : Wrong user name or password for Database!"
+        cursor = conn.cursor()
+        try:
+            sql = f"SELECT * FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = '{self.database_name}'"
+            cursor.execute(sql)
+        except:
+            self.Create_Database()
+
+        return True,"SUCCESS : Database connected!"
 
     def execute_sql(self, sql):
         conn = pymysql.connect(host=host, user=user, password=password,

@@ -19,15 +19,13 @@ class control():
 
         self.load_info()
         self.renew_status()
-        # print(self.info)
-        # print(self.user_status)
-    
-    def get_id(self,username):
-        dict = {v[0] : k for k, v in self.info.items()}
+
+    def get_id(self, username):
+        dict = {v[0]: k for k, v in self.info.items()}
         return dict[username]
 
     def load_info(self):
-        self.info={}
+        self.info = {}
         l = list(self.database.get_all_data('info'))
         for i in l:
             self.info[i[0]] = [i[1], i[2]]
@@ -90,7 +88,11 @@ class control():
 
     def adduser(self, name, email):
         userid = list(self.info.keys())[-1]+1
-        print(addface.addface(userid))
+        state, msg = addface.addface(userid)
+        # state, msg = addface.addface_frompic(userid)
+
+        if(not state):
+            return msg
         info = [userid, name, email]
         self.database.add_new_entry('info', info)
 
@@ -98,25 +100,27 @@ class control():
         self.getin(userid)
         self.getout(userid)
         self.renew_status()
+        return msg
 
-    def deleteuser(self,username):
-        userid=self.get_id(username)
-        print(addface.deleteface(userid))
-        self.database.delete_table_entry('info',userid)
-        self.database.delete_table_entry('entry',userid)
+    def deleteuser(self, username):
+        try:
+            userid = self.get_id(username)
+        except:
+            return f'FAIL : user "{username}" not exist'
 
+        self.database.delete_table_entry('info', userid)
+        self.database.delete_table_entry('entry', userid)
         self.load_info()
         self.renew_status()
-        
+        return addface.deleteface(userid)
 
 
 # print(addface.addface())
 if __name__ == "__main__":
     os.system('cls')
     c = control()
-    # c.adduser("test", "test")
-    # print(c.check(4))
-    # c.deleteuser("test")
+    print(c.adduser("test", "test"))
+    print(c.deleteuser("test"))
     # c.addface()
     # print(c.check(1))
     # print(c.check(1))
