@@ -15,38 +15,34 @@
   </head>
 
   <body class="sub_page">
-    <div class="hero_area">
-      <header class="header_section">
-        <div class="container-fluid">
-          <nav class="navbar navbar-expand-lg custom_nav-container ">
-            <a class="navbar-brand" href="/">
-              <span>实验室打卡系统</span>
-            </a>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav">
-                {%if state == 0 %}
-                <li class="nav-item">
-                  <a class="nav-link" href="/login"> 管理员登录 </a>
-                </li>
-                {% elif state == 1%}
-                <li class="nav-item">
-                  <a class="nav-link" href="/adminPage"> 管理员后台 </a>
-                </li>
-                {%endif%}
-              </ul>
-            </div>
-          </nav>
-        </div>
-      </header>
-    </div>
+    
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="/">
+            <span>实验室打卡系统</span>
+          </a>
+        </nav>
+      </div>
+    </header>
 
     <section class="catagory_section layout_padding">
       <div class="catagory_container">
         <div class="container ">
           <div class="row">
-              <div class="col-md-12 col-lg-12">
+              <div class="col-md-4">
                   <div class="btn-box">
-                      <a>Something</a>
+                      <a href="/imgUpload">录入人脸</a>
+                  </div>
+              </div>
+              <div class="col-md-4">
+                  <div class="btn-box">
+                      <a href="/manageInfo">管理信息</a>
+                  </div>
+              </div>
+              <div class="col-md-4">
+                  <div class="btn-box">
+                      <a href="/">返回打卡</a>
                   </div>
               </div>
           </div>
