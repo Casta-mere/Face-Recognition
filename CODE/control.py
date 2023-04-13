@@ -4,7 +4,10 @@ from face import addface
 import time
 import datetime
 import threading
+import face_recognition
+import numpy as np
 import os
+import cv2
 
 time_sep = 500  # 间隔时间
 
@@ -19,6 +22,9 @@ class control():
 
         self.load_info()
         self.renew_status()
+        self.myinner = control.recognize(self.info,self)
+        self.myinner.start()
+
 
     def get_id(self, username):
         dict = {v[0]: k for k, v in self.info.items()}
@@ -88,19 +94,29 @@ class control():
 
     def adduser(self, name, email):
         userid = list(self.info.keys())[-1]+1
-        state, msg = addface.addface(userid)
-        # state, msg = addface.addface_frompic(userid)
+        # state, msg = addface.addface(userid)
+        try:
+            self.myinner.stop()
+            # msg="SUCCESS : add face success"
+            state, msg = addface.addface_frompic(userid)
 
-        if(not state):
+            if(not state):
+                return msg
+            info = [userid, name, email]
+            self.database.add_new_entry('info', info)
+
+            self.load_info()
+            self.getin(userid)
+            self.getout(userid)
+            self.renew_status()
+            
+            self.myinner=control.recognize(self.info,self)
+            self.myinner.start()
+
             return msg
-        info = [userid, name, email]
-        self.database.add_new_entry('info', info)
 
-        self.load_info()
-        self.getin(userid)
-        self.getout(userid)
-        self.renew_status()
-        return msg
+        except:
+            return "FAIL : add face failed"
 
     def deleteuser(self, username):
         try:
@@ -114,14 +130,95 @@ class control():
         self.renew_status()
         return addface.deleteface(userid)
 
+    class recognize():
 
+        def __init__(self,dictionary,obj):
+            self.frame_stack = []
+            self.width = 0
+            self.height = 0
+            self.target_size = (1500, 1500)
+            self.img_path = 'face/faceImg'
+            self.known_face_encodings = []
+            self.known_face_names = []
+            self.load_faces(dictionary)
+            self.obj=obj
+            self.flagDetect=True
+            self.flagCamera=True
+
+        def load_faces(self,dictionary):
+            for i in dictionary.keys():
+                img_path = f'{self.img_path}/{i}.jpg'
+                img=face_recognition.load_image_file(img_path)
+                face_encoding = face_recognition.face_encodings(img)[0]
+                self.known_face_encodings.append(face_encoding)
+                self.known_face_names.append(dictionary[i][0])
+
+        def get_video(self):
+            capture=cv2.VideoCapture(0)
+            flag=True
+            while True and self.flagCamera:
+                if(flag):
+                    flag=False
+                    print("SUCCESS : Camera is ready")
+                ret, frame = capture.read()
+                if not ret:
+                    break
+                self.frame_stack.append(frame)
+                if(len(self.frame_stack) > 50):
+                    self.frame_stack=[]
+            capture.release()
+
+        def response(self, state, name="", confidence=0):
+            if state == True:
+                print(name + " " + str(confidence))
+                return(name + " " + str(confidence))
+            else:
+                print("no face recognized")
+                return("no face recognized")
+
+        def detect_faces(self):
+            t = threading.Thread(target=self.get_video)
+            t.start()
+            while True and self.flagDetect:
+                if len(self.frame_stack)==0:
+                    continue
+                frame = self.frame_stack.pop()
+                self.frame_stack=[]
+                frame=cv2.resize(frame,self.target_size)
+
+                face_locations = face_recognition.face_locations(frame)
+                face_encodings = face_recognition.face_encodings(frame, face_locations)
+                if len(face_locations) == 0:
+                    self.response(False)
+                else:
+                    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                        matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
+                        name = "Unknown"
+                        face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
+                        best_match_index = np.argmin(face_distances)
+                        confidence = 1 - face_distances[best_match_index]
+                        if matches[best_match_index] and confidence > 0.6:
+                            name = self.known_face_names[best_match_index]
+                            self.response(True, name, confidence)
+                            print(self.obj.check(self.obj.get_id(name)))
+                        else:
+                            self.response(True, "unknown", confidence)   
+            self.flagCamera=False
+
+        def start(self):
+            t= threading.Thread(target=self.detect_faces)
+            t.start()
+
+        def stop(self):
+            self.flagDetect=False
+            print("SUCCESS : Camera is closed")
+  
 # print(addface.addface())
 if __name__ == "__main__":
     os.system('cls')
     c = control()
-    print(c.adduser("test", "test"))
-    print(c.deleteuser("test"))
-    # c.addface()
+    # print(c.deleteuser("test"))
+    # c.adduser()
     # print(c.check(1))
     # print(c.check(1))
     # print(c.check(1))
