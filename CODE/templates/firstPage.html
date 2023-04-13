@@ -45,10 +45,18 @@
       <div class="catagory_container">
         <div class="container ">
           <div class="row">
-              <div class="col-md-12 col-lg-12">
-                <video class = "m-auto" id="video-preview" autoplay></video>
-              </div>
+            <video class = "m-auto" id="video-preview" autoplay></video>
           </div>
+          <br>
+        {%if rcgState == 1%}
+          <div class="row">
+            <h2 class="m-auto">{{rcgName}}签到成功</h2>
+          </div>
+        {%elif rcgState == 2%}
+          <div class="row">
+            <h2 class="m-auto">{{rcgName}}请勿重复签到</h2>
+          </div>
+        {%endif%}
         </div>
       </div>
     </section>
