@@ -32,14 +32,17 @@
               <h2 class="">请输入姓名：</h2>
             </div>
           </div>
-          <div class="col-md-5 ">
+          <div class="col-md-6 ">
             <form action="/deleteInfo" method="get">
               <div id="delName" name="delName">
                 <input id="delName" name="delName" value="{{delName}}" type="text" placeholder="姓名" />
+                <div class="btn-box">
+                  <button>删除</button>
+                  &emsp;&emsp;
+                  <button onclick="turnBack()">返回</button>
+                </div>
               </div>
-              <div class="btn-box">
-                <button>删除</button>
-              </div>
+              
             </form>
           </div>
           <div class="col-md-2">
@@ -47,7 +50,7 @@
           </div>
           <div class="col-md-2">
             <div class="btn-box">
-              <button onclick="turnBack()">返回</button>
+              
             </div>
         </div>
       </div>
