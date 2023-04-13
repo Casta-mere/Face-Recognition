@@ -10,6 +10,8 @@ app = Flask(__name__)
 globals.loginState=0
 globals.password="123456"
 globals.retry=0
+globals.controls=control.control()
+globals.deleteName=""
  
 # 首页
 @app.route('/',methods=['GET','POST'])
@@ -59,6 +61,13 @@ def sendInfo():
 def manageInfo():
     return render_template('manageInfo.html')
 
+# 显示信息
+@app.route('/deleteInfo',methods=['GET','POST'])
+def deleteInfo():
+    name=request.values.get('delName')
+    globals.controls.deleteuser(name)
+    return render_template('manageInfo.html')
+
 # 登录界面
 @app.route('/login',methods=['POST','GET'])
 def login():
@@ -73,7 +82,7 @@ def login():
 # 检查是否为管理员
 @app.route('/loginCheck',methods=['GET','POST'])
 def loginCheck():
-    password=request.args.get('password')
+    password=request.values.get('password')
     print(password)
     if globals.password==password:
         globals.loginState=1
@@ -91,4 +100,4 @@ def adminPage():
 
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0',port=5000)
+    app.run(debug=True,host='0.0.0.0',port=8500)
