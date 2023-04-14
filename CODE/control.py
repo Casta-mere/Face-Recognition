@@ -3,14 +3,19 @@ from database import database
 from face import addface
 import time
 import datetime
+import asyncio
+import base64
 import threading
+import websockets
 import face_recognition
 import numpy as np
 import os
 import cv2
 
-time_sep = 500  # 间隔时间
-
+time_sep = 60  # 间隔时间
+IP_ADDR = "192.168.136.148"
+IP_PORT = "8888"
+sourcedir = 'face/faceImg/source.jpg'
 
 class control():
 
@@ -22,8 +27,8 @@ class control():
 
         self.load_info()
         self.renew_status()
-        self.myinner = control.recognize(self.info,self)
-        self.myinner.start()
+        self.recognition = control.recognize(self.info,self)
+        self.recognition.start()
 
 
     def get_id(self, username):
@@ -96,7 +101,7 @@ class control():
         userid = list(self.info.keys())[-1]+1
         # state, msg = addface.addface(userid)
         try:
-            self.myinner.stop()
+            self.recognition.stop()
             # msg="SUCCESS : add face success"
             state, msg = addface.addface_frompic(userid)
 
@@ -110,8 +115,7 @@ class control():
             self.getout(userid)
             self.renew_status()
             
-            self.myinner=control.recognize(self.info,self)
-            self.myinner.start()
+            self.recognition.restart()
 
             return msg
 
@@ -142,49 +146,47 @@ class control():
             self.known_face_names = []
             self.load_faces(dictionary)
             self.obj=obj
-            self.flagDetect=True
-            self.flagCamera=True
+            self.flagDetect=False
+            self.falgRestart=False
+            self.flagLoad=False
+            self.server=control.recognize.Server(self)
+            self.server.start_server()
 
         def load_faces(self,dictionary):
+            self.flagLoad=True
+            self.known_face_encodings=[]
+            self.known_face_names=[]
             for i in dictionary.keys():
                 img_path = f'{self.img_path}/{i}.jpg'
                 img=face_recognition.load_image_file(img_path)
                 face_encoding = face_recognition.face_encodings(img)[0]
                 self.known_face_encodings.append(face_encoding)
                 self.known_face_names.append(dictionary[i][0])
-
-        def get_video(self):
-            capture=cv2.VideoCapture(0)
-            flag=True
-            while True and self.flagCamera:
-                if(flag):
-                    flag=False
-                    print("SUCCESS : Camera is ready")
-                ret, frame = capture.read()
-                if not ret:
-                    break
-                self.frame_stack.append(frame)
-                if(len(self.frame_stack) > 50):
-                    self.frame_stack=[]
-            capture.release()
+            self.flagLoad=False
 
         def response(self, state, name="", confidence=0):
             if state == True:
                 print(name + " " + str(confidence))
                 return(name + " " + str(confidence))
             else:
-                print("no face recognized")
-                return("no face recognized")
+                print("FAIL : no face recognized")
+                return("FAIL : no face recognized")
 
         def detect_faces(self):
-            t = threading.Thread(target=self.get_video)
-            t.start()
-            while True and self.flagDetect:
+            while True :
+                if self.falgRestart:
+                    continue
+                if not self.flagDetect:
+                    continue
+                if self.flagLoad:
+                    continue
                 if len(self.frame_stack)==0:
                     continue
                 frame = self.frame_stack.pop()
                 self.frame_stack=[]
-                frame=cv2.resize(frame,self.target_size)
+
+                # frame=cv2.resize(frame,self.target_size)
+                # cv2.imwrite(sourcedir,frame)
 
                 face_locations = face_recognition.face_locations(frame)
                 face_encodings = face_recognition.face_encodings(frame, face_locations)
@@ -203,34 +205,75 @@ class control():
                             print(self.obj.check(self.obj.get_id(name)))
                         else:
                             self.response(True, "unknown", confidence)   
-            self.flagCamera=False
 
         def start(self):
             t= threading.Thread(target=self.detect_faces)
             t.start()
 
         def stop(self):
-            self.flagDetect=False
-            print("SUCCESS : Camera is closed")
-  
-# print(addface.addface())
+            self.flagRestart=True
+            print("ALERT : Detect stopped!")
+
+        def restart(self):
+            self.flagRestart=False
+            self.load_faces()
+            print("SUCCESS : Detect restarted!")
+        
+
+        class Server():
+            
+            def __init__(self,obj):
+                self.IP_ADDR = IP_ADDR
+                self.IP_PORT = IP_PORT
+                self.obj=obj
+
+            def start_server(self):
+                t=threading.Thread(target=self.start)
+                t.start()
+
+            def start(self):
+                print("ALERT : Waiting for Connection")
+                asyncio.set_event_loop(asyncio.new_event_loop())
+                self.server = websockets.serve(self.serverRun, self.IP_ADDR, self.IP_PORT)
+                asyncio.get_event_loop().run_until_complete(self.server)
+                asyncio.get_event_loop().run_forever()
+
+            async def serverHands(self,websocket):
+                while True:
+                    recv_text = await websocket.recv()
+                    if recv_text == "hello":
+                        await websocket.send("123")
+                        return True
+                    else:
+                        await websocket.send("connected fail")
+            
+            # receive the video from client and show it in the window using opencv
+            async def serverRecv(self,websocket):
+                while True:
+                    recv_text = await websocket.recv()
+                    if "data:image/jpeg;base64," in recv_text:
+                        recv_text = recv_text.replace("data:image/jpeg;base64,", "")
+                        imgdata = base64.b64decode(recv_text)
+                        image = cv2.imdecode(np.frombuffer(imgdata, np.uint8), cv2.IMREAD_COLOR)
+                        if(len(self.obj.frame_stack)>50):
+                            self.obj.fraem_stack=[]
+                        # print(image.shape)
+                        self.obj.frame_stack.append(image)
+                        cv2.imshow("server", image)
+                        cv2.waitKey(1)
+
+            # handshake with client
+            async def serverRun(self,websocket):
+                await self.serverHands(websocket)
+                print("SUCCESS : Connection start!")
+                self.obj.flagDetect=True
+                try:
+                    await self.serverRecv(websocket)
+                except websockets.exceptions.ConnectionClosed:
+                    self.obj.flagDetect=False
+                    print("ALERT : Connection closed!")
+                    print("ALERT : Waiting for Connection")
+
 if __name__ == "__main__":
     os.system('cls')
     c = control()
-    # print(c.deleteuser("test"))
-    # c.adduser()
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
-    # time.sleep(6)
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
-    # time.sleep(6)
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
-    # print(c.check(1))
