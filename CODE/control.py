@@ -21,6 +21,7 @@ sourcedir = 'face/faceImg/source.jpg'
 class control():
 
     def __init__(self):
+        os.system('cls')
         self.database = database.my_sql('facerecognition')
         # self.mail=mail()
         self.info = {}
@@ -106,10 +107,8 @@ class control():
 
     def adduser(self, name, email):
         userid = list(self.info.keys())[-1]+1
-        # state, msg = addface.addface(userid)
         try:
             self.recognition.stop()
-            # msg="SUCCESS : add face success"
             state, msg = addface.addface_frompic(userid)
 
             if(not state):
@@ -136,10 +135,10 @@ class control():
         except:
             msg = f"用户{username}不存在"
             return False, msg
-            # return False,f'FAIL : user "{username}" not exist'
 
         self.database.delete_table_entry('info', userid)
         self.database.delete_table_entry('entry', userid)
+        self.adduser.delete_face(userid)
         self.load_info()
         self.renew_status()
         self.recognition.load_faces(self.info)
