@@ -33,17 +33,18 @@
             </div>
           </div>
           <div class="col-md-6 ">
-            <form action="/deleteInfo" method="get">
-              <div id="delName" name="delName">
+              <div id="delName0" name="delName0">
                 <input id="delName" name="delName" value="{{delName}}" type="text" placeholder="姓名" />
                 <div class="btn-box">
-                  <button>删除</button>
+                  <button onclick="turnToDel()">删除</button>
                   &emsp;&emsp;
                   <button onclick="turnBack()">返回</button>
                 </div>
               </div>
-              
-            </form>
+              <div>
+                <br><br>
+                <h3 id="waitDel" class="m-auto"></h3>
+              </div>
           </div>
           <div class="col-md-2">
             
@@ -67,45 +68,38 @@
       }
     </script>
     <script>
-      function turnToD() {
-        window.location.href = "/deleteInfo";
-      }
+      
     </script>
     <script>
       function turnToDel() {
-        var nData = document.getElementById('delName');
+        var nData = document.getElementById('delName').value;
+        console.log(nData);
         var uploadAjax = $.ajax({
-          type: "get",
-          //后端需要调用的地址
           url:"/deleteInfo",
-          dataType: "json",
+          type: "get",
+          dataType: "text",
           data: JSON.stringify({"delName": nData}),
           contentType:"json/application",
-          //设置超时
           timeout:10000,
-          async: true,
-          success: function (htmlVal) {
-              alert(nData.value);
-              window.location.href = "/";
+          async: false,
+          beforeSend: function () {
+            $('#waitDel').html("请稍后...")
+          },
+          success: function (msg) {
+              alert(msg);
+              window.location.href = "/adminPage";
           },
           error: function(data) {
-              alert("删除失败");
+              alert(msg);
           },
-          //调用执行后调用的函数
           complete: function (XMLHttpRequest, textStatus) {
               if(textStatus == 'timeout'){
-                  uploadAjax.abort(); //取消请求
-                  //超时提示：请求超时，请重试
+                  uploadAjax.abort(); 
                   alert("请求超时，请重试")
-                  //请求超时返回首页
-                  closeCard();
               }
           }
       });
       }
-    </script>
-    <script>
-
     </script>
     <script src="static/js/jquery-3.4.1.min.js"></script>
     <script src="static/js/bootstrap.js"></script>
