@@ -45,7 +45,7 @@ def addface_frompic(userid):
     frame = cv2.imread(sourcedir)
     target_size = (1080, 1080)
     # resize frame
-    frame = cv2.resize(frame, target_size)
+    # frame = cv2.resize(frame, target_size)
     # improve face detection by converting to grayscale
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     face_locations = face_recognition.face_locations(frame)
@@ -72,4 +72,4 @@ def deleteface(userid):
 
 
 if __name__ == "__main__":
-    print(addface(1))
+    print(addface_frompic(4))
