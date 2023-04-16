@@ -138,7 +138,7 @@ class control():
 
         self.database.delete_table_entry('info', userid)
         self.database.delete_table_entry('entry', userid)
-        self.adduser.delete_face(userid)
+        addface.deleteface(userid)
         self.load_info()
         self.renew_status()
         self.recognition.load_faces(self.info)
