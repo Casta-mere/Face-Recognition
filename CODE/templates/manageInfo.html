@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>实验室打卡系统</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/static/css/style.css" rel="stylesheet" />
+    <link href="/static/css/responsive.css" rel="stylesheet" />
+  </head>
+
+  <body class="sub_page">
+
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <a class="navbar-brand" href="/">
+            <span>实验室打卡系统</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="contact_section layout_padding">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3 ">
+            <div class="heading_container ">
+              <h2 class="">请输入姓名：</h2>
+            </div>
+          </div>
+          <div class="col-md-6 ">
+            <form action="/deleteInfo" method="get">
+              <div id="delName" name="delName">
+                <input id="delName" name="delName" value="{{delName}}" type="text" placeholder="姓名" />
+                <div class="btn-box">
+                  <button>删除</button>
+                  &emsp;&emsp;
+                  <button onclick="turnBack()">返回</button>
+                </div>
+              </div>
+              
+            </form>
+          </div>
+          <div class="col-md-2">
+            
+          </div>
+          <div class="col-md-2">
+            <div class="btn-box">
+              
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      function subscribe() {
+        alert("Subscribe Success!");
+      }
+    </script>
+    <script>
+      function turnBack() {
+        window.location.href = "/";
+      }
+    </script>
+    <script>
+      function turnToD() {
+        window.location.href = "/deleteInfo";
+      }
+    </script>
+    <script>
+      function turnToDel() {
+        var nData = document.getElementById('delName');
+        var uploadAjax = $.ajax({
+          type: "get",
+          //后端需要调用的地址
+          url:"/deleteInfo",
+          dataType: "json",
+          data: JSON.stringify({"delName": nData}),
+          contentType:"json/application",
+          //设置超时
+          timeout:10000,
+          async: true,
+          success: function (htmlVal) {
+              alert(nData.value);
+              window.location.href = "/";
+          },
+          error: function(data) {
+              alert("删除失败");
+          },
+          //调用执行后调用的函数
+          complete: function (XMLHttpRequest, textStatus) {
+              if(textStatus == 'timeout'){
+                  uploadAjax.abort(); //取消请求
+                  //超时提示：请求超时，请重试
+                  alert("请求超时，请重试")
+                  //请求超时返回首页
+                  closeCard();
+              }
+          }
+      });
+      }
+    </script>
+    <script>
+
+    </script>
+    <script src="static/js/jquery-3.4.1.min.js"></script>
+    <script src="static/js/bootstrap.js"></script>
+    <script src="static/js/custom.js"></script>
+
+  </body>
+
+</html>
+<!--测试这个传递的功能-->
