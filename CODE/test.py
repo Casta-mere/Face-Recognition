@@ -12,13 +12,16 @@ globals.password="123456"
 globals.retry=0
 globals.controls=control.control()
 globals.deleteName=""
+globals.recog={'name':'wyj','state':2}
  
 # 首页
 @app.route('/',methods=['GET','POST'])
 def hello_world():
     return render_template(
         'firstPage.html',
-        state=globals.loginState
+        state=globals.loginState,
+        rcgName=globals.recog['name'],
+        rcgState=globals.recog['state']
         )
 
 # 录入人脸界面
@@ -38,7 +41,7 @@ def receive_image():
         img_np = numpy.fromstring(img, dtype='uint8')
         new_img_np = cv2.imdecode(img_np, 1)
         try:
-            cv2.imwrite('./CODE/image/rev_image.jpg',new_img_np)
+            cv2.imwrite('./CODE/face/faceImg/source.jpg',new_img_np)
             print('data:{}'.format('success'))
         except:
             print('data:{}'.format('failed'))
@@ -53,7 +56,7 @@ def sendInfo():
     print(data)
     name=data['name']
     email=data['email']
-    print('name:{}'.format(name),'email:{}'.format(email))
+    globals.controls.adduser(name,email)
     return redirect(url_for('hello_world'))
  
 # 删除信息
