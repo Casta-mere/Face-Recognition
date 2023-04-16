@@ -55,25 +55,23 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 ">
-                    <div class="heading_container ">
-                        <h2 class="">请输入个人信息：</h2>
-                    </div>
-                    <form action="/sendInfo" method="post">
-                        <div id="name" name="name">
+                        <div class="heading_container ">
+                            <h2 class="">请输入个人信息：</h2>
+                        </div>
+                        <div id="name0" name="name">
                             <input id="name" name="name" value="{{name}}" type="text" placeholder="姓名" />
                         </div>
-                        <div id="email" name="email">
+                        <div id="email0" name="email">
                             <input id="email" name="email" value="{{email}}" type="email" placeholder="邮箱" />
                         </div>
                         <div class="btn-box">
-                            <a href="/sendInfo">
+                            <a onclick="sendBack()">
                                 <button>发送</button>
                             </a>
                         </div>
                         <div>
-                        <br>
+                            <br>
                         </div>
-                    </form>
                     </div>
                 </div>
             </div>
@@ -166,6 +164,38 @@
             }
 
         </script>
-
+        <script>
+            function sendBack(){
+                var name = document.getElementById("name").value
+                var email = document.getElementById("email").value
+                console.log(name)
+                console.log(email)
+                var uploadAjax = $.ajax({
+                    url:'/sendInfo',
+                    type: 'get',
+                    dataType: "text",
+                    data: JSON.stringify({"name": name, "email": email}),
+                    contentType:'json/application',
+                    //设置超时
+                    timeout:10000,
+                    async: false,
+                    success: function (msg) {
+                        alert(msg)
+                        window.location.href = "/";
+                    },
+                    error: function(msg) {
+                        alert(msg)
+                    },
+                    //调用执行后调用的函数
+                    complete: function (XMLHttpRequest, textStatus) {
+                        if(textStatus == 'timeout'){
+                            uploadAjax.abort(); //取消请求
+                            //超时提示：请求超时，请重试
+                            alert("请求超时，请重试")
+                        }
+                    }
+                });
+            }
+        </script>
     </body>
 </html>
