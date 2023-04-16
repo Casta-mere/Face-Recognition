@@ -48,24 +48,26 @@
             <video class = "m-auto" id="video-preview" autoplay></video>
           </div>
           <br>
-        {%if rcgState == 1%}
           <div class="row">
-            <h2 class="m-auto">{{rcgName}}签到成功</h2>
+            <h2 class="m-auto" id="rcg"></h2>
           </div>
-        {%elif rcgState == 2%}
-          <div class="row">
-            <h2 class="m-auto">{{rcgName}}请勿重复签到</h2>
-          </div>
-        {%endif%}
         </div>
       </div>
     </section>
-    <script src="/static/js/camera.js"></script>
-    <script>
-      function subscribe() {
-        alert("Subscribe Success!");
+    <script type="text/javascript">
+      function getState(){
+        $.ajax({
+            url: "/getState",
+            type: "get",
+            timeout: 10000,
+            success: function(msg){
+              $('#rcg').html(msg)
+          },
+          });
       }
+      setInterval(getState, 400)
     </script>
+    <script src="/static/js/camera.js"></script>
     <script src="/static/js/jquery-3.4.1.min.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/custom.js"></script>
