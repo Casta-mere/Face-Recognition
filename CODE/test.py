@@ -12,7 +12,6 @@ globals.password="123456"
 globals.retry=0
 globals.controls=control.control()
 globals.deleteName=""
-globals.recog={'name':'wyj','state':1}
 globals.msg=""
 
 def m():
@@ -60,13 +59,17 @@ def receive_image():
     return 'upload'
 
 # 填姓名+邮箱并录入
-@app.route('/sendInfo',methods=['POST'])
+@app.route('/sendInfo',methods=['POST','GET'])
 def sendInfo():
-    data=request.form.to_dict()
+    data=list(request.args.to_dict().keys())[0]
+    data=json.loads(data)
+    print(data)
     name=data['name']
     email=data['email']
-    print(globals.controls.adduser(name,email))
-    return redirect(url_for('hello_world'))
+    con,msg=globals.controls.adduser(name,email)
+    print(msg)
+    return msg
+    # return redirect(url_for('hello_world'))
  
 # 删除信息
 @app.route('/manageInfo',methods=['GET','POST'])
@@ -76,9 +79,13 @@ def manageInfo():
 # 显示信息
 @app.route('/deleteInfo',methods=['GET','POST'])
 def deleteInfo():
-    name=request.values.get('delName')
-    print(globals.controls.deleteuser(name))
-    return render_template('manageInfo.html')
+    name=list(request.args.to_dict().keys())[0]
+    name=json.loads(name)
+    name=name['delName']
+    print(name)
+    con,msg=globals.controls.deleteuser(name)
+    return msg
+    # return render_template('manageInfo.html')
 
 # 登录界面
 @app.route('/login',methods=['POST','GET'])
@@ -112,4 +119,5 @@ def adminPage():
 
 
 if __name__ == '__main__':
-    app.run(debug=False,host='0.0.0.0',port=8500)
+    # app.run(debug=False,)
+    app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
