@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request,Response,jsonify,redirect,url_for,globals
-from flask_cors import CORS
 import json
 import cv2
 import numpy
 import base64
+import threading
 import control
 app = Flask(__name__) 
  
@@ -12,17 +12,28 @@ globals.password="123456"
 globals.retry=0
 globals.controls=control.control()
 globals.deleteName=""
-globals.recog={'name':'wyj','state':2}
- 
+globals.recog={'name':'wyj','state':1}
+globals.msg=""
+
+def m():
+    while True:
+        for i in globals.controls.get_msg():
+            globals.msg=i
+
+t=threading.Thread(target=m)
+t.start()
+
 # 首页
 @app.route('/',methods=['GET','POST'])
 def hello_world():
     return render_template(
         'firstPage.html',
-        state=globals.loginState,
-        rcgName=globals.recog['name'],
-        rcgState=globals.recog['state']
+        state=globals.loginState
         )
+
+@app.route('/getState',methods=['GET','POST'])
+def getState():
+    return globals.msg
 
 # 录入人脸界面
 @app.route('/imgUpload',methods=['GET','POST'])
@@ -38,13 +49,13 @@ def receive_image():
         json_data = json.loads(data)
         str_image = json_data["imgData"]
         img = base64.b64decode(str_image)
-        img_np = numpy.fromstring(img, dtype='uint8')
+        img_np = numpy.frombuffer(img, dtype='uint8')
         new_img_np = cv2.imdecode(img_np, 1)
         try:
-            cv2.imwrite('./CODE/face/faceImg/source.jpg',new_img_np)
-            print('data:{}'.format('success'))
+            cv2.imwrite('face/faceImg/source.jpg',new_img_np)
+            print('SUCCESS : {}'.format('load image success!'))
         except:
-            print('data:{}'.format('failed'))
+            print('FAIL : {}'.format('take photo failed!'))
         
     return 'upload'
 
@@ -52,11 +63,9 @@ def receive_image():
 @app.route('/sendInfo',methods=['POST'])
 def sendInfo():
     data=request.form.to_dict()
-    print(type(data))
-    print(data)
     name=data['name']
     email=data['email']
-    globals.controls.adduser(name,email)
+    print(globals.controls.adduser(name,email))
     return redirect(url_for('hello_world'))
  
 # 删除信息
@@ -68,7 +77,7 @@ def manageInfo():
 @app.route('/deleteInfo',methods=['GET','POST'])
 def deleteInfo():
     name=request.values.get('delName')
-    globals.controls.deleteuser(name)
+    print(globals.controls.deleteuser(name))
     return render_template('manageInfo.html')
 
 # 登录界面
@@ -86,7 +95,7 @@ def login():
 @app.route('/loginCheck',methods=['GET','POST'])
 def loginCheck():
     password=request.values.get('password')
-    print(password)
+    # print(password)
     if globals.password==password:
         globals.loginState=1
         return redirect(url_for('hello_world'))
@@ -103,4 +112,4 @@ def adminPage():
 
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0',port=8500)
+    app.run(debug=False,host='0.0.0.0',port=8500)
