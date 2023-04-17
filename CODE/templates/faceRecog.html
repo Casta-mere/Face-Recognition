@@ -71,131 +71,110 @@
                         </div>
                         <div>
                             <br>
+                            <h3 id="waitA"></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+        <script>
+            function closeMedia() {
+                var video = document.getElementById('video');
+                if (!video.srcObject) return
+                let stream = video.srcObject
+                let tracks = stream.getTracks();
+                tracks.forEach(track => {
+                    track.stop()
+                })
+        }   
+        
+        let video = document.getElementById("video");
+        function getMedia() {
+            let constraints = {
+                video: {width: 400, height: 400},
+                audio: false
+            };
+            let promise = navigator.mediaDevices.getUserMedia(constraints);
+            promise.then(function (MediaStream) {
+                video.srcObject = MediaStream;
+                video.play();
+            }).catch(function (PermissionDeniedError) {
+                console.log(PermissionDeniedError);
+            })
+        }
+        
 
+        
+        function takePhoto() {
+            let canvas = document.getElementById("canvas");
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, 400, 400);
+        }
+        
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        function uploadImage(){
+            canvas.width = 400;
+            canvas.height = 400;
+            context.drawImage(video, 0, 0, 400, 400);
+            var imgData = canvas.toDataURL("image/jpg");
+            imgData = imgData.replace(/^data:image\/(png|jpg);base64,/,"")
+            var uploadAjax = $.ajax({
+                type: "post",
+                url:"/receiveImage",
+                data: JSON.stringify({"imgData": imgData}),
+                contentType:"json/application",
+                timeout:10000,
+                async: true,
+                complete: function (XMLHttpRequest, textStatus) {
+                    if(textStatus == 'timeout'){
+                        uploadAjax.abort(); 
+                        alert("请求超时，请重试")
+                        closeCard();
+                    }
+                }
+            });
+        }
+        
+        function turnBack() {
+            window.location.href = "/";
+        }
+        
+        function sendBack(){
+            var name = document.getElementById("name").value
+            var email = document.getElementById("email").value
+            console.log(name)
+            console.log(email)
+            var uploadAjax = $.ajax({
+                url:'/sendInfo',
+                type: 'get',
+                dataType: "text",
+                data: JSON.stringify({"name": name, "email": email}),
+                contentType:'json/application',
+                timeout:15000,
+                async: true,
+                beforeSend: function () {
+                    $("#waitA").html("正在发送，请稍后...");
+                },
+                success: function (msg) {
+                    alert(msg)
+                    window.location.href = "/adminPage";
+                },
+                error: function(msg) {
+                    alert(msg)
+                    $("#waitA").html("");
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    if(textStatus == 'timeout'){
+                        uploadAjax.abort(); 
+                        alert("请求超时，请重试")
+                    }
+                }
+            });
+        }
+        </script>
         <script src='static/js/camera.js'></script>
         <script src='static/js/jquery-1.7.1.min.js'></script>
-        <script>
-            //关闭摄像头
-            function closeMedia() {
-                    var video = document.getElementById('video');
-                    if (!video.srcObject) return
-                    let stream = video.srcObject
-                    let tracks = stream.getTracks();
-                    tracks.forEach(track => {
-                        track.stop()
-                    })
-            }   
-
-            //获得video摄像头区域
-            let video = document.getElementById("video");
-            function getMedia() {
-                let constraints = {
-                    video: {width: 400, height: 400},
-                    audio: false
-                };
-                /*
-                这里介绍新的方法:H5新媒体接口 navigator.mediaDevices.getUserMedia()
-                这个方法会提示用户是否允许媒体输入,(媒体输入主要包括相机,视频采集设备,屏幕共享服务,麦克风,A/D转换器等)
-                返回的是一个Promise对象。
-                如果用户同意使用权限,则会将 MediaStream对象作为resolve()的参数传给then()
-                如果用户拒绝使用权限,或者请求的媒体资源不可用,则会将 PermissionDeniedError作为reject()的参数传给catch()
-                */
-                let promise = navigator.mediaDevices.getUserMedia(constraints);
-                promise.then(function (MediaStream) {
-                    video.srcObject = MediaStream;
-                    video.play();
-                }).catch(function (PermissionDeniedError) {
-                    console.log(PermissionDeniedError);
-                })
-            }
-
-            function takePhoto() {
-                //获得Canvas对象
-                let canvas = document.getElementById("canvas");
-                let ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, 400, 400);
-            }
-
-            //图片上传到服务器
-            //获取Canvas的编码
-            var canvas = document.getElementById('canvas');
-            var context = canvas.getContext('2d');
-            function uploadImage(){
-                canvas.width = 400;
-                canvas.height = 400;
-                context.drawImage(video, 0, 0, 400, 400);
-                var imgData = canvas.toDataURL("image/jpg");
-                imgData = imgData.replace(/^data:image\/(png|jpg);base64,/,"")
-                //上传到后台。
-                var uploadAjax = $.ajax({
-                    type: "post",
-                    //后端需要调用的地址
-                    url:"/receiveImage",
-                    data: JSON.stringify({"imgData": imgData}),
-                    contentType:"json/application",
-                    //设置超时
-                    timeout:10000,
-                    async: true,
-                    success: function (htmlVal) {
-                        //成功后回调
-                    },
-                    error: function(data) {
-                    },
-                    //调用执行后调用的函数
-                    complete: function (XMLHttpRequest, textStatus) {
-                        if(textStatus == 'timeout'){
-                            uploadAjax.abort(); //取消请求
-                            //超时提示：请求超时，请重试
-                            alert("请求超时，请重试")
-                            //请求超时返回首页
-                            closeCard();
-                        }
-                    }
-                });
-            }
-
-            function turnBack() {
-                window.location.href = "/";
-            }
-
-        </script>
-        <script>
-            function sendBack(){
-                var name = document.getElementById("name").value
-                var email = document.getElementById("email").value
-                console.log(name)
-                console.log(email)
-                var uploadAjax = $.ajax({
-                    url:'/sendInfo',
-                    type: 'get',
-                    dataType: "text",
-                    data: JSON.stringify({"name": name, "email": email}),
-                    contentType:'json/application',
-                    //设置超时
-                    timeout:10000,
-                    async: false,
-                    success: function (msg) {
-                        alert(msg)
-                        window.location.href = "/";
-                    },
-                    error: function(msg) {
-                        alert(msg)
-                    },
-                    //调用执行后调用的函数
-                    complete: function (XMLHttpRequest, textStatus) {
-                        if(textStatus == 'timeout'){
-                            uploadAjax.abort(); //取消请求
-                            //超时提示：请求超时，请重试
-                            alert("请求超时，请重试")
-                        }
-                    }
-                });
-            }
-        </script>
+        <script src="static/js/custom.js"></script>
     </body>
 </html>

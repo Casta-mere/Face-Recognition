@@ -8,7 +8,8 @@ navigator.mediaDevices.getUserMedia({ video: true })
   .catch(error => {
     console.error(error);
   });
-let socket = new WebSocket('ws://192.168.102.148:8888');
+// let socket = new WebSocket('ws://192.168.102.148:8888');
+let socket = new WebSocket('ws://192.168.121.33:8888');
 //shake hands with server :send hello
 socket.onopen = function (event) {
     socket.send("hello");
