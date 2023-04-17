@@ -81,7 +81,7 @@
           data: JSON.stringify({"delName": nData}),
           contentType:"json/application",
           timeout:10000,
-          async: false,
+          async: true,
           beforeSend: function () {
             $('#waitDel').html("请稍后...")
           },
@@ -91,6 +91,7 @@
           },
           error: function(data) {
               alert(msg);
+              $('#waitDel').html("")
           },
           complete: function (XMLHttpRequest, textStatus) {
               if(textStatus == 'timeout'){
