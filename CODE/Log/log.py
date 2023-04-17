@@ -13,6 +13,7 @@ class log():
         logger = logging.getLogger('werkzeug')
         handler = logging.FileHandler(f'Log/{self.date}-weblog.log')
         handler.addFilter(lambda record: 'getState' not in record.getMessage())
+        handler.addFilter(lambda record: '/static' not in record.getMessage())
         logger.addHandler(handler)
 
     def log(self,msg):

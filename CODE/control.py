@@ -3,7 +3,7 @@ from database import database
 from face import addface
 import time
 import datetime
-import asyncio
+import asyncio  
 import base64
 import threading
 import websockets
@@ -106,9 +106,11 @@ class control():
         elif(valid and status):
             self.getout(userid)
             self.msg = f"{self.info[userid][0]}签退成功"
+            time.sleep(3)
         elif(valid and not status):
             self.getin(userid)
             self.msg = f"{self.info[userid][0]}签到成功"
+            time.sleep(3)
         return self.msg
 
     def adduser(self, name, email):
