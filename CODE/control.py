@@ -74,6 +74,12 @@ class control():
         self.database.update_table_entry(userid, t)
         self.renew_status()
 
+    def initial_user(self, userid):
+        d,t= time.strftime('%Y-%m-%d', time.localtime()),'00:00:00'
+        entry = [userid, self.info[userid][0], d, t, t, False]
+        self.database.add_new_entry('entry', entry)
+        self.renew_status()
+
     def is_valid(self, userid):
         lasttime = self.user_status[userid][1]
         # print(lasttime,type(lasttime))
@@ -106,7 +112,11 @@ class control():
         return self.msg
 
     def adduser(self, name, email):
-        userid = list(self.info.keys())[-1]+1
+        # userid 为空闲的最小id
+        userid = 1
+        while(userid in self.info.keys()):
+            userid += 1
+
         try:
             self.recognition.stop()
             state, msg = addface.addface_frompic(userid)
@@ -117,8 +127,7 @@ class control():
             self.database.add_new_entry('info', info)
 
             self.load_info()
-            self.getin(userid)
-            self.getout(userid)
+            self.initial_user(userid)
             self.renew_status()
 
             self.recognition.load_faces(self.info)
@@ -138,7 +147,7 @@ class control():
 
         self.database.delete_table_entry('info', userid)
         self.database.delete_table_entry('entry', userid)
-        self.adduser.delete_face(userid)
+        addface.deleteface(userid)
         self.load_info()
         self.renew_status()
         self.recognition.load_faces(self.info)

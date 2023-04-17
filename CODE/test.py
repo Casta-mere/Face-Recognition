@@ -5,6 +5,8 @@ import numpy
 import base64
 import threading
 import control
+from Log import log
+
 app = Flask(__name__) 
  
 globals.loginState=0
@@ -13,6 +15,7 @@ globals.retry=0
 globals.controls=control.control()
 globals.deleteName=""
 globals.msg=""
+globals.log=log.log()
 
 def m():
     while True:
