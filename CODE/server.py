@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,Response,jsonify,redirect,url_for,globals
+from flask import Flask, render_template, request,redirect,url_for,globals
 import json
 import cv2
 import numpy
@@ -88,7 +88,6 @@ def deleteInfo():
     print(name)
     con,msg=globals.controls.deleteuser(name)
     return msg
-    # return render_template('manageInfo.html')
 
 # 登录界面
 @app.route('/login',methods=['POST','GET'])
@@ -122,5 +121,5 @@ def adminPage():
 
 
 if __name__ == '__main__':
-    # app.run(debug=False,)
-    app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
+    app.run(debug=False, use_reloader=False,host='0.0.0.0',port=8500)
+    # app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
