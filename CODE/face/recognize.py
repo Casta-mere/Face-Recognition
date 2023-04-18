@@ -11,7 +11,71 @@ frame_stack = []
 width = 0
 height = 0
 
+class recognize():
 
+    def __init__(self,dictionary):
+        self.frame_stack = []
+        self.width = 0
+        self.height = 0
+        self.target_size = (1500, 1500)
+        self.img_path = 'face/faceImg'
+        self.known_face_encodings = []
+        self.known_face_names = []
+        self.load_faces(dictionary)
+
+    def load_faces(self,dictionary):
+        for i in dictionary.keys():
+            img_path = f'{self.img_path}/{i}.jpg'
+            img=face_recognition.load_image_file(img_path)
+            face_encoding = face_recognition.face_encodings(img)[0]
+            self.known_face_encodings.append(face_encoding)
+            self.known_face_names.append(dictionary[i][0])
+
+    def get_video(self):
+        capture=cv2.VideoCapture(0)
+
+        while True:
+            ret, frame = capture.read()
+            if not ret:
+                break
+            self.frame_stack.append(frame)
+            if(len(self.frame_stack) > 50):
+                self.frame_stack=[]
+        capture.release()
+
+    def response(self, state, name="", confidence=0):
+        if state == True:
+            return(name + " " + str(confidence))
+        else:
+            return("no face recognized")
+
+    def detect_faces(self):
+        t = threading.Thread(target=self.get_video)
+        t.start()
+        while True:
+            if len(self.frame_stack)==0:
+                continue
+            frame = self.frame_stack.pop()
+            self.frame_stack=[]
+            frame=cv2.resize(frame,self.target_size)
+
+            face_locations = face_recognition.face_locations(frame)
+            face_encodings = face_recognition.face_encodings(frame, face_locations)
+            if len(face_locations) == 0:
+                self.response(False)
+            else:
+                for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                    matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
+                    name = "Unknown"
+                    face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
+                    best_match_index = np.argmin(face_distances)
+                    confidence = 1 - face_distances[best_match_index]
+                    if matches[best_match_index] and confidence > 0.6:
+                        name = self.known_face_names[best_match_index]
+                        self.response(True, name, confidence)
+                    else:
+                        self.response(True, "unknown", confidence)        
+        
 def get_video():
     global width, height, frame_stack
     # Initialize video capture from RTSP stream
@@ -85,5 +149,7 @@ def detect_faces():
                 else:
                     response(True, "unknown", confidence)
 
-
-detect_faces()
+if __name__ == "__main__":
+    dict={1: ['王旭刚', '2287245796@qq.com'], 2: ['韦杨婧', '981193371@qq.com'], 3: ['刘俊伟', '1917871807@qq.com']}
+    re=recognize(dict)
+    re.detect_faces()
