@@ -66,7 +66,7 @@ def receive_image():
 def sendInfo():
     data=list(request.args.to_dict().keys())[0]
     data=json.loads(data)
-    print(data)
+    # print(data)
     name=data['name']
     email=data['email']
     con,msg=globals.controls.adduser(name,email)
@@ -85,8 +85,9 @@ def deleteInfo():
     name=list(request.args.to_dict().keys())[0]
     name=json.loads(name)
     name=name['delName']
-    print(name)
+    # print(name)
     con,msg=globals.controls.deleteuser(name)
+    print(msg)
     return msg
 
 # 登录界面

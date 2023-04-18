@@ -1,6 +1,7 @@
 from database import database
 # from mail import mail
 from face import addface
+from IP import IP
 import time
 import datetime
 import asyncio  
@@ -13,7 +14,7 @@ import os
 import cv2
 
 time_sep = 300              # 间隔时间
-IP_ADDR = "192.168.102.148"  # 服务器IP地址
+IP_ADDR = IP.get_ip()  # 服务器IP地址
 IP_PORT = "8888"            # 服务器端口号
 sourcedir = 'face/faceImg/source.jpg'
 
@@ -32,6 +33,7 @@ class control():
         self.recognition = control.recognize(self.info, self)
         self.recognition.start()
         self.msg = ""
+        print("SUCCESS : Server is running on http://{}:{}".format(IP_ADDR, "8500"))
 
     def get_msg(self):
         time.sleep(0.5)
@@ -89,7 +91,7 @@ class control():
         dalta = int(dalta.total_seconds())
         # print(dalta,type(dalta))
 
-        if dalta > time_sep:
+        if dalta*dalta > time_sep*time_sep:
             return True
         else:
             return False
