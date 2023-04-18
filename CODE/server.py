@@ -28,7 +28,7 @@ t.start()
 # 首页
 @app.route('/',methods=['GET','POST'])
 def hello_world():
-    ipContent="ws://"+temp_ip+":"+temp_port
+    ipContent="wss://"+temp_ip+":"+temp_port
     return render_template(
         'firstPage.html',
         state=globals.loginState,
@@ -59,7 +59,7 @@ def receive_image():
             cv2.imwrite('face/faceImg/source.jpg',new_img_np)
             print('SUCCESS : {}'.format('load image success!'))
         except:
-            print('FAIL : {}'.format('take photo failed!'))
+            print('ERROR : {}'.format('take photo failed!'))
         
     return 'upload'
 
@@ -125,4 +125,5 @@ def adminPage():
 
 if __name__ == '__main__':
     # app.run(debug=False, use_reloader=False,host='0.0.0.0',port=8500)
-    app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
+    # app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
+    app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500,ssl_context=('static/servercert/server-cert.pem', 'static/servercert/server-key.pem'))
