@@ -1,9 +1,12 @@
 from database import database
 # from mail import mail
 from face import addface
+from IP import IP
+from Log import log
+
 import time
 import datetime
-import asyncio  
+import asyncio
 import base64
 import threading
 import websockets
@@ -13,7 +16,7 @@ import os
 import cv2
 
 time_sep = 300              # 间隔时间
-IP_ADDR = "192.168.102.148"  # 服务器IP地址
+IP_ADDR = IP.get_ip()  # 服务器IP地址
 IP_PORT = "8888"            # 服务器端口号
 sourcedir = 'face/faceImg/source.jpg'
 
@@ -23,6 +26,8 @@ class control():
     def __init__(self):
         os.system('cls')
         self.database = database.my_sql('facerecognition')
+        self.log = log.log()
+
         # self.mail=mail()
         self.info = {}
         self.user_status = {}
@@ -32,6 +37,10 @@ class control():
         self.recognition = control.recognize(self.info, self)
         self.recognition.start()
         self.msg = ""
+
+        success="SUCCESS : Server is running on http://{}:{}".format(IP_ADDR, "8500")
+        print(success)
+        self.log.log(success)
 
     def get_msg(self):
         time.sleep(0.5)
@@ -75,7 +84,7 @@ class control():
         self.renew_status()
 
     def initial_user(self, userid):
-        d,t= time.strftime('%Y-%m-%d', time.localtime()),'00:00:00'
+        d, t = time.strftime('%Y-%m-%d', time.localtime()), '00:00:00'
         entry = [userid, self.info[userid][0], d, t, t, False]
         self.database.add_new_entry('entry', entry)
         self.renew_status()
@@ -89,7 +98,7 @@ class control():
         dalta = int(dalta.total_seconds())
         # print(dalta,type(dalta))
 
-        if dalta > time_sep:
+        if dalta*dalta > time_sep*time_sep:
             return True
         else:
             return False

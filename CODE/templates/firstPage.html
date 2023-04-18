@@ -23,6 +23,10 @@
             <a class="navbar-brand" href="/">
               <span>实验室打卡系统</span>
             </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class=""> </span>
+            </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav">
                 {%if state == 0 %}
@@ -67,10 +71,16 @@
       }
       setInterval(getState, 400)
     </script>
-    <script src="/static/js/camera.js"></script>
+    <script type="text/javascript">
+      var Server = {
+              ip:{{ ip|tojson }}
+    };
+    </script>
     <script src="/static/js/jquery-3.4.1.min.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/custom.js"></script>
+    <script src="/static/js/camera.js"></script>
+    
 
   </body>
 </html>
