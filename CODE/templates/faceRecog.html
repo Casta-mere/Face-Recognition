@@ -151,7 +151,7 @@
                 dataType: "text",
                 data: JSON.stringify({"name": name, "email": email}),
                 contentType:'json/application',
-                timeout:15000,
+                timeout:1500000,
                 async: true,
                 beforeSend: function () {
                     $("#waitA").html("正在发送，请稍后...");

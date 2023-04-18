@@ -55,7 +55,7 @@ def addface_frompic(userid):
 
     # If no faces are detected, return
     if not face_locations:
-        return False, "FAIL : No face detected"
+        return False, "未检测到人脸，请站远一点再重试"
 
     # Save the face encoding to a file in the faceImg directory
     filename = f'{userid}.jpg'
