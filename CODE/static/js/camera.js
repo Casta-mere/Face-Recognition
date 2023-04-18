@@ -1,15 +1,21 @@
 const videoPreview = document.getElementById('video-preview');
-navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => {
-    videoPreview.srcObject = stream;
-    videoPreview.play();
-    console.log("played");
-  })
-  .catch(error => {
+while (true) {
+  try {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        videoPreview.srcObject = stream;
+        videoPreview.play();
+        console.log("played");
+      })
+    break
+  } catch(error) {
     console.error(error);
-  });
-let socket = new WebSocket('ws://192.168.102.148:8888');
-// let socket = new WebSocket('ws://192.168.121.33:8888');
+  }
+}
+
+let ip=Server.ip
+let socket = new WebSocket(ip);
+
 //shake hands with server :send hello
 socket.onopen = function (event) {
     socket.send("hello");

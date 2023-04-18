@@ -5,7 +5,6 @@ import numpy
 import base64
 import threading
 import control
-from Log import log
 
 app = Flask(__name__) 
  
@@ -15,7 +14,8 @@ globals.retry=0
 globals.controls=control.control()
 globals.deleteName=""
 globals.msg=""
-globals.log=log.log()
+temp_ip=control.IP_ADDR
+temp_port=control.IP_PORT
 
 def m():
     while True:
@@ -28,9 +28,11 @@ t.start()
 # 首页
 @app.route('/',methods=['GET','POST'])
 def hello_world():
+    ipContent="ws://"+temp_ip+":"+temp_port
     return render_template(
         'firstPage.html',
-        state=globals.loginState
+        state=globals.loginState,
+        ip=ipContent
         )
 
 @app.route('/getState',methods=['GET','POST'])
@@ -66,7 +68,7 @@ def receive_image():
 def sendInfo():
     data=list(request.args.to_dict().keys())[0]
     data=json.loads(data)
-    print(data)
+    # print(data)
     name=data['name']
     email=data['email']
     con,msg=globals.controls.adduser(name,email)
@@ -85,8 +87,9 @@ def deleteInfo():
     name=list(request.args.to_dict().keys())[0]
     name=json.loads(name)
     name=name['delName']
-    print(name)
+    # print(name)
     con,msg=globals.controls.deleteuser(name)
+    print(msg)
     return msg
 
 # 登录界面
@@ -121,5 +124,5 @@ def adminPage():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, use_reloader=False,host='0.0.0.0',port=8500)
-    # app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
+    # app.run(debug=False, use_reloader=False,host='0.0.0.0',port=8500)
+    app.run(debug=True, use_reloader=False,host='0.0.0.0',port=8500)
