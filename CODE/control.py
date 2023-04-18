@@ -3,7 +3,7 @@ from database import database
 from face import addface
 import time
 import datetime
-import asyncio
+import asyncio  
 import base64
 import threading
 import websockets
@@ -21,6 +21,7 @@ sourcedir = 'face/faceImg/source.jpg'
 class control():
 
     def __init__(self):
+        os.system('cls')
         self.database = database.my_sql('facerecognition')
         # self.mail=mail()
         self.info = {}
@@ -73,6 +74,12 @@ class control():
         self.database.update_table_entry(userid, t)
         self.renew_status()
 
+    def initial_user(self, userid):
+        d,t= time.strftime('%Y-%m-%d', time.localtime()),'00:00:00'
+        entry = [userid, self.info[userid][0], d, t, t, False]
+        self.database.add_new_entry('entry', entry)
+        self.renew_status()
+
     def is_valid(self, userid):
         lasttime = self.user_status[userid][1]
         # print(lasttime,type(lasttime))
@@ -99,17 +106,21 @@ class control():
         elif(valid and status):
             self.getout(userid)
             self.msg = f"{self.info[userid][0]}签退成功"
+            time.sleep(3)
         elif(valid and not status):
             self.getin(userid)
             self.msg = f"{self.info[userid][0]}签到成功"
+            time.sleep(3)
         return self.msg
 
     def adduser(self, name, email):
-        userid = list(self.info.keys())[-1]+1
-        # state, msg = addface.addface(userid)
+        # userid 为空闲的最小id
+        userid = 1
+        while(userid in self.info.keys()):
+            userid += 1
+
         try:
             self.recognition.stop()
-            # msg="SUCCESS : add face success"
             state, msg = addface.addface_frompic(userid)
 
             if(not state):
@@ -118,8 +129,7 @@ class control():
             self.database.add_new_entry('info', info)
 
             self.load_info()
-            self.getin(userid)
-            self.getout(userid)
+            self.initial_user(userid)
             self.renew_status()
 
             self.recognition.load_faces(self.info)
@@ -136,10 +146,10 @@ class control():
         except:
             msg = f"用户{username}不存在"
             return False, msg
-            # return False,f'FAIL : user "{username}" not exist'
 
         self.database.delete_table_entry('info', userid)
         self.database.delete_table_entry('entry', userid)
+        addface.deleteface(userid)
         self.load_info()
         self.renew_status()
         self.recognition.load_faces(self.info)
