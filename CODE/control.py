@@ -14,9 +14,11 @@ import face_recognition
 import numpy as np
 import os
 import cv2
+import sys
+import ssl
 
 time_sep = 300              # 间隔时间
-IP_ADDR = IP.get_ip()  # 服务器IP地址
+IP_ADDR = IP.get_ip()       # 服务器IP地址
 IP_PORT = "8888"            # 服务器端口号
 sourcedir = 'face/faceImg/source.jpg'
 
@@ -38,7 +40,7 @@ class control():
         self.recognition.start()
         self.msg = ""
 
-        success="SUCCESS : Server is running on http://{}:{}".format(IP_ADDR, "8500")
+        success="SUCCESS : Server is running on https://{}:{}".format(IP_ADDR, "8500")
         print(success)
         self.log.log(success)
 
@@ -130,29 +132,36 @@ class control():
 
         try:
             self.recognition.stop()
-            state, msg = addface.addface_frompic(userid)
 
+            state, msg = addface.addface_frompic(userid)
             if(not state):
-                return False, msg
+                self.log.log(msg)
+                return False, "未检测到人脸，请站远一点再重试"
+
+            self.log.log(msg+f", username : {name}")
             info = [userid, name, email]
             self.database.add_new_entry('info', info)
-
             self.load_info()
             self.initial_user(userid)
             self.renew_status()
 
             self.recognition.load_faces(self.info)
             self.recognition.restart()
-            msg = f"新用户{name}添加成功"
+
+            msg = f"SUCCESS : 新用户{name}添加成功"
             return True, msg
 
         except:
-            return False, "FAIL : add face failed"
+            msg=f"ERROR IN {sys._getframe().f_code.co_name}"
+            self.log.log(msg)
+            return False, msg
 
     def deleteuser(self, username):
         try:
             userid = self.get_id(username)
         except:
+            msg=f"ERROR : user {username} not exist!"
+            self.log.log(msg)
             msg = f"用户{username}不存在"
             return False, msg
 
@@ -162,7 +171,10 @@ class control():
         self.load_info()
         self.renew_status()
         self.recognition.load_faces(self.info)
-        msg = f"用户{username}删除成功"
+
+        msg=f"SUCCESS : user {username} deleted!"
+        self.log.log(msg)
+        msg = f"SUCCESS : 用户{username}删除成功"
         return True, msg
 
     class recognize():
@@ -189,10 +201,13 @@ class control():
             self.known_face_names = []
             for i in dictionary.keys():
                 img_path = f'{self.img_path}/{i}.jpg'
-                img = face_recognition.load_image_file(img_path)
-                face_encoding = face_recognition.face_encodings(img)[0]
-                self.known_face_encodings.append(face_encoding)
-                self.known_face_names.append(dictionary[i][0])
+                try:
+                    img = face_recognition.load_image_file(img_path)
+                    face_encoding = face_recognition.face_encodings(img)[0]
+                    self.known_face_encodings.append(face_encoding)
+                    self.known_face_names.append(dictionary[i][0])
+                except:
+                    print(f"ERROR : {dictionary[i]} not exist")
             self.flagLoad = False
 
         def response(self, state, name="", confidence=0):
@@ -200,9 +215,9 @@ class control():
                 # print(name + " " + str(confidence))
                 return(name + " " + str(confidence))
             else:
-                # print("FAIL : no face recognized")
+                # print("ERROR : no face recognized")
                 self.obj.msg = ""
-                return("FAIL : no face recognized")
+                return("ERROR : no face recognized")
 
         def detect_faces(self):
             while True:
@@ -266,12 +281,18 @@ class control():
                 t.start()
 
             def start(self):
-                print("ALERT : Waiting for Connection")
+                msg="ALERT : Waiting for Connection"
+                self.obj.obj.log.log(msg)
+                print(msg)
+
                 asyncio.set_event_loop(asyncio.new_event_loop())
+                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+                ssl_context.load_cert_chain(certfile="static/servercert/server-cert.pem", keyfile="static/servercert/server-key.pem")
                 self.server = websockets.serve(
-                    self.serverRun, self.IP_ADDR, self.IP_PORT)
+                    self.serverRun, self.IP_ADDR, self.IP_PORT, ssl=ssl_context)
                 asyncio.get_event_loop().run_until_complete(self.server)
                 asyncio.get_event_loop().run_forever()
+
 
             async def serverHands(self, websocket):
                 while True:
@@ -302,14 +323,21 @@ class control():
             # handshake with client
             async def serverRun(self, websocket):
                 await self.serverHands(websocket)
-                print("SUCCESS : Connection start!")
+                msg=f"SUCCESS : Connection start on {self.IP_ADDR}:{self.IP_PORT}"
+                self.obj.obj.log.log(msg)
+                print(msg)
+
                 self.obj.flagDetect = True
                 try:
                     await self.serverRecv(websocket)
                 except websockets.exceptions.ConnectionClosed:
                     self.obj.flagDetect = False
-                    print("ALERT : Connection closed!")
-                    print("ALERT : Waiting for Connection")
+                    msg=f"ALERT : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
+                    self.obj.obj.log.log(msg)
+                    print(msg)
+                    msg=f"ALERT : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
+                    self.obj.obj.log.log(msg)
+                    print(msg)
 
 
 if __name__ == "__main__":
