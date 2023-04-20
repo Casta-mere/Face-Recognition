@@ -26,9 +26,8 @@ sourcedir = 'face/faceImg/source.jpg'
 class control():
 
     def __init__(self):
-        os.system('cls')
-        self.database = database.my_sql('facerecognition')
-        self.log = log.log()
+        self.init_log()
+        self.init_db()
 
         # self.mail=mail()
         self.info = {}
@@ -40,9 +39,24 @@ class control():
         self.recognition.start()
         self.msg = ""
 
-        success="SUCCESS : Server is running on https://{}:{}".format(IP_ADDR, "8500")
+        success = "SUCCESS : Server is running on https://{}:{}".format(
+            IP_ADDR, "8500")
         print(success)
         self.log.log(success)
+
+    def init_log(self):
+        os.system('cls')
+        self.log = log.log()
+        self.log.log("====================================================================")
+        self.log.log("NEW INSTANCE RUNNING")
+
+    def init_db(self):
+        self.database = database.my_sql('facerecognition')
+        state, msg = self.database.boot_selftest()
+        self.log.log(msg)
+        print(msg)
+        if not state:
+            sys.exit(0)
 
     def get_msg(self):
         time.sleep(0.5)
@@ -152,7 +166,7 @@ class control():
             return True, msg
 
         except:
-            msg=f"ERROR IN {sys._getframe().f_code.co_name}"
+            msg = f"ERROR IN {sys._getframe().f_code.co_name}"
             self.log.log(msg)
             return False, msg
 
@@ -160,7 +174,7 @@ class control():
         try:
             userid = self.get_id(username)
         except:
-            msg=f"ERROR : user {username} not exist!"
+            msg = f"ERROR : user {username} not exist!"
             self.log.log(msg)
             msg = f"用户{username}不存在"
             return False, msg
@@ -172,7 +186,7 @@ class control():
         self.renew_status()
         self.recognition.load_faces(self.info)
 
-        msg=f"SUCCESS : user {username} deleted!"
+        msg = f"SUCCESS : user {username} deleted!"
         self.log.log(msg)
         msg = f"SUCCESS : 用户{username}删除成功"
         return True, msg
@@ -281,18 +295,18 @@ class control():
                 t.start()
 
             def start(self):
-                msg="ALERT : Waiting for Connection"
+                msg = "ALERT : Waiting for Connection"
                 self.obj.obj.log.log(msg)
                 print(msg)
 
                 asyncio.set_event_loop(asyncio.new_event_loop())
                 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-                ssl_context.load_cert_chain(certfile="static/servercert/server-cert.pem", keyfile="static/servercert/server-key.pem")
+                ssl_context.load_cert_chain(
+                    certfile="static/servercert/server-cert.pem", keyfile="static/servercert/server-key.pem")
                 self.server = websockets.serve(
                     self.serverRun, self.IP_ADDR, self.IP_PORT, ssl=ssl_context)
                 asyncio.get_event_loop().run_until_complete(self.server)
                 asyncio.get_event_loop().run_forever()
-
 
             async def serverHands(self, websocket):
                 while True:
@@ -323,7 +337,7 @@ class control():
             # handshake with client
             async def serverRun(self, websocket):
                 await self.serverHands(websocket)
-                msg=f"SUCCESS : Connection start on {self.IP_ADDR}:{self.IP_PORT}"
+                msg = f"SUCCESS : Connection start on {self.IP_ADDR}:{self.IP_PORT}"
                 self.obj.obj.log.log(msg)
                 print(msg)
 
@@ -332,10 +346,10 @@ class control():
                     await self.serverRecv(websocket)
                 except websockets.exceptions.ConnectionClosed:
                     self.obj.flagDetect = False
-                    msg=f"ALERT : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
+                    msg = f"ALERT : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
                     self.obj.obj.log.log(msg)
                     print(msg)
-                    msg=f"ALERT : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
+                    msg = f"ALERT : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
                     self.obj.obj.log.log(msg)
                     print(msg)
 

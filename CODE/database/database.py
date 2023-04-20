@@ -14,31 +14,41 @@ class my_sql():
 
     def __init__(self, database_name):
         self.database_name = database_name
-        state,msg=self.initial()
-        print(msg)
-        if(not state):
-            exit(0)
 
-    def initial(self):
+
+    # self-test when booting
+    def boot_selftest(self):
+
+        # check if user name and password are correct
         try:
             conn = pymysql.connect(host=host, user=user,
                                    password=password, charset='utf8')
         except:
-            return False,"FAIL : Wrong user name or password for Database!"
+            return False, "FAIL : Wrong user name or password for Database!"
         cursor = conn.cursor()
+
+        # check if database exists, if not create one
         try:
             sql = f"SELECT * FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = '{self.database_name}'"
             cursor.execute(sql)
+            cursor.close()
         except:
+            print("ALERT : Database not found, creating new database...")
             self.Create_Database()
 
-        return True,"SUCCESS : Database connected!"
+        return True, "SUCCESS : Database connected!"
 
     def execute_sql(self, sql):
         conn = pymysql.connect(host=host, user=user, password=password,
                                database=self.database_name, charset='utf8')
         cursor = conn.cursor()
-        cursor.execute(sql)
+        try:
+            cursor.execute(sql)
+        except:
+            conn.rollback()
+            with open("err.txt", "a", encoding="utf-8")as f:
+                f.write(sql+"\n")
+            print("ERROR : Check your sql syntax!")
         cursor.close()
         conn.commit()
         conn.close()
