@@ -199,6 +199,7 @@ class control():
             self.height = 0
             self.target_size = (1500, 1500)
             self.img_path = 'face/faceImg'
+            self.npy_path = 'face/faceNpy'
             self.known_face_encodings = []
             self.known_face_names = []
             self.load_faces(dictionary)
@@ -210,19 +211,21 @@ class control():
             self.server.start_server()
 
         def load_faces(self, dictionary):
+            t=time.time()
             self.flagLoad = True
             self.known_face_encodings = []
             self.known_face_names = []
             for i in dictionary.keys():
-                img_path = f'{self.img_path}/{i}.jpg'
+                npy_path = f'{self.npy_path}/{i}.npy'
                 try:
-                    img = face_recognition.load_image_file(img_path)
-                    face_encoding = face_recognition.face_encodings(img)[0]
+                    face_encoding = np.load(npy_path)
                     self.known_face_encodings.append(face_encoding)
                     self.known_face_names.append(dictionary[i][0])
                 except:
                     print(f"ERROR : {dictionary[i]} not exist")
             self.flagLoad = False
+            print("load faces cost : "+str(time.time()-t))
+            print(f"total {len(self.known_face_encodings)} faces loaded")
 
         def response(self, state, name="", confidence=0):
             if state == True:
