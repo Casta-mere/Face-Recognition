@@ -15,7 +15,7 @@ def addface(userid):
     if(video_capture.isOpened()):
         print("SUCCESS : Video capture initialized")
     else:
-        return False, "FAIL : Error initializing video capture"
+        return False, "ERROR : Error initializing video capture"
 
     # Take picture using video capture
     ret, frame = video_capture.read()
@@ -31,7 +31,7 @@ def addface(userid):
 
     # If no faces are detected, return
     if not face_locations:
-        return False, "FAIL : No face detected"
+        return False, "ERROR : No face detected"
 
     # Save the face encoding to a file in the faceImg directory
     filename = f'{userid}.jpg'
@@ -55,20 +55,20 @@ def addface_frompic(userid):
 
     # If no faces are detected, return
     if not face_locations:
-        return False, "未检测到人脸，请站远一点再重试"
+        return False, "ERROR : No face detected"
 
     # Save the face encoding to a file in the faceImg directory
     filename = f'{userid}.jpg'
     filepath = os.path.join(dir, filename)
     cv2.imwrite(filepath, frame)
-    return True, f"SUCCESS : New face added: userid:{userid}"
+    return True, f"SUCCESS : New face added ! userid : {userid}"
 
 
 def deleteface(userid):
     filename = f'{userid}.jpg'
     filepath = os.path.join(dir, filename)
     os.remove(filepath)
-    return f"SUCCESS : Face removed: userid:{userid}"
+    return f"SUCCESS : Face removed: userid : {userid}"
 
 
 if __name__ == "__main__":
