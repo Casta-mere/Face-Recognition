@@ -47,8 +47,7 @@ class control():
     def init_log(self):
         os.system('cls')
         self.log = log.log()
-        self.log.log("====================================================================")
-        self.log.log("NEW INSTANCE RUNNING")
+        
 
     def init_db(self):
         self.database = database.my_sql('facerecognition')

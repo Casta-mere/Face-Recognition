@@ -1,11 +1,16 @@
 import pymysql
 
+import sys
+sys.path.append(sys.path[0]+'/..')
+print(sys.path)
+from Log import log
+
 # change the following to your own database
 
 # local
 host = 'localhost'
 user = 'root'
-password = ''
+password = 'aaa6953217'
 
 # server
 
@@ -14,7 +19,6 @@ class my_sql():
 
     def __init__(self, database_name):
         self.database_name = database_name
-
 
     # self-test when booting
     def boot_selftest(self):
@@ -36,22 +40,25 @@ class my_sql():
             print("ALERT : Database not found, creating new database...")
             self.Create_Database()
 
+        self.conn=pymysql.connect(host=host, user=user,passwd=password, db=self.database_name, charset='utf8')
+        self.cursor=self.conn.cursor()
+        self.log=log.classlog("database")
+
         return True, "SUCCESS : Database connected!"
 
     def execute_sql(self, sql):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
+
         try:
-            cursor.execute(sql)
-        except:
-            conn.rollback()
+            self.cursor.execute(sql)
+            self.conn.commit()
+        except Exception as e:
+            self.log.log("ERROR : "+str(e))
+            self.conn.rollback()
             with open("err.txt", "a", encoding="utf-8")as f:
                 f.write(sql+"\n")
             print("ERROR : Check your sql syntax!")
-        cursor.close()
-        conn.commit()
-        conn.close()
+
+        return self.cursor.fetchall()
 
     def Create_Database(self):
         conn = pymysql.connect(host=host, user=user,
@@ -256,9 +263,10 @@ def showlist(L):
 
 
 if __name__ == "__main__":
-    reset()
-    # db=my_sql("facerecognition")
-
+    # reset()
+    db=my_sql("facerecognition")
+    db.boot_selftest()
+    print(db.execute_sql("select * from info"))
     # print(db.get_newest_data("entry",2))
     # showlist(db.get_newest_data("entry",3))
     # info=entry2=[3,'ljw','2022-01-01','08:00:00','',True]
