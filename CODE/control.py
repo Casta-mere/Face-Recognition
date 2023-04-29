@@ -29,6 +29,7 @@ class control():
         self.init_log()
         self.init_db()
 
+
         # self.mail=mail()
         self.info = {}
         self.user_status = {}
@@ -37,18 +38,38 @@ class control():
         self.renew_status()
         self.recognition = control.recognize(self.info, self)
         self.recognition.start()
+    
+        
+        self.clientDict={}
+
         self.msg = ""
+
 
         success = "SUCCESS : Server is running on https://{}:{}".format(
             IP_ADDR, "8500")
         print(success)
         self.log.log(success)
 
+    def add_client(self):
+        if(len(self.clientDict.keys())==0):
+            PORT=8100
+        else:
+            PORT=max(self.clientDict.keys())+1
+        msg,client=self.recognition.add_client(PORT,1)
+
+        self.log.log(msg)
+        self.clientDict[PORT]=client
+        return PORT,client
+        
+    def del_client(self,PORT):
+        self.recognition.del_client(PORT)
+        del self.clientDict[PORT]
+
+        
     def init_log(self):
         os.system('cls')
         self.log = log.log()
         
-
     def init_db(self):
         self.database = database.my_sql('facerecognition')
         state, msg = self.database.boot_selftest()
@@ -118,24 +139,25 @@ class control():
         else:
             return False
 
-    def check(self, userid):
+    def check(self, userid,id):
         valid = self.is_valid(userid)
         status = self.user_status[userid][0]
-        self.msg = ""
+        client=self.clientDict[id]
+        client.msg = ""
 
         if(not valid and status):
-            self.msg = f"{self.info[userid][0]}请勿重复签到"
+            client.msg = f"{self.info[userid][0]}请勿重复签到"
         elif(not valid and not status):
-            self.msg = f"{self.info[userid][0]}请勿重复签退"
+            client.msg = f"{self.info[userid][0]}请勿重复签退"
         elif(valid and status):
             self.getout(userid)
-            self.msg = f"{self.info[userid][0]}签退成功"
+            client.msg = f"{self.info[userid][0]}签退成功"
             time.sleep(3)
         elif(valid and not status):
             self.getin(userid)
-            self.msg = f"{self.info[userid][0]}签到成功"
+            client.msg = f"{self.info[userid][0]}签到成功"
             time.sleep(3)
-        return self.msg
+        return client.msg
 
     def adduser(self, name, email):
         # userid 为空闲的最小id
@@ -196,21 +218,28 @@ class control():
     class recognize():
 
         def __init__(self, dictionary, obj):
+            self.obj = obj
+            self.known_face_encodings = []
+            self.known_face_names = []
+            self.img_path = 'face/faceImg'
+            self.npy_path = 'face/faceNpy'
+
+            self.frame_queue = []
+
+            self.client={}
+
             self.frame_stack = []
             self.width = 0
             self.height = 0
             self.target_size = (1500, 1500)
-            self.img_path = 'face/faceImg'
-            self.npy_path = 'face/faceNpy'
-            self.known_face_encodings = []
-            self.known_face_names = []
+
             self.load_faces(dictionary)
-            self.obj = obj
+
             self.flagDetect = False
             self.falgRestart = False
-            self.flagLoad = False
-            self.server = control.recognize.Server(self)
-            self.server.start_server()
+            self.flagLoad = False # weather is loading faces
+            # self.server = control.recognize.Server(self)
+            # self.server.start_server()
 
         def load_faces(self, dictionary):
             t=time.time()
@@ -223,11 +252,36 @@ class control():
                     face_encoding = np.load(npy_path)
                     self.known_face_encodings.append(face_encoding)
                     self.known_face_names.append(dictionary[i][0])
-                except:
+                except Exception as e:
+                    self.obj.log.log("ERROR : "+str(e)+" in load_faces")
                     print(f"ERROR : {dictionary[i]} not exist")
+            
             self.flagLoad = False
             print("load faces cost : "+str(time.time()-t))
             print(f"total {len(self.known_face_encodings)} faces loaded")
+
+        def is_image_in_queue(self,id):
+            return not self.client[id][1]
+
+        def update_image_in_queue(self,id,frame):
+            self.frame_queue.insert(0,[id,frame])
+            self.client[id][1]=True
+        
+        def image_processed(self,id):
+            print(f'processed with device {id}')
+            self.client[id][1]=False
+            # pass
+
+        def add_client(self,PORT,Type):
+            self.client[PORT]=[self.Client(self,IP_ADDR,PORT,Type,PORT),False]
+            self.client[PORT][0].start_client()
+
+            return "SUCCESS",self.client[PORT][0]
+
+
+        def del_client(self,IP_PORT):
+            del self.client[IP_PORT]
+
 
         def response(self, state, name="", confidence=0):
             if state == True:
@@ -236,7 +290,7 @@ class control():
             else:
                 # print("ERROR : no face recognized")
                 self.obj.msg = ""
-                return("ERROR : no face recognized")
+                # return("ERROR : no face recognized")
 
         def detect_faces(self):
             while True:
@@ -246,11 +300,16 @@ class control():
                     continue
                 if self.flagLoad:
                     continue
-                if len(self.frame_stack) == 0:
+                if len(self.frame_queue) == 0:
                     continue
-                frame = self.frame_stack.pop()
-                self.frame_stack = []
+                
+                
+                # frame = self.frame_stack.pop()
+                # self.frame_stack = []
 
+                info = self.frame_queue.pop()
+                id=info[0]
+                frame=info[1]
                 # frame=cv2.resize(frame,self.target_size)
                 # cv2.imwrite(sourcedir,frame)
 
@@ -271,10 +330,12 @@ class control():
                         if matches[best_match_index] and confidence > 0.6:
                             name = self.known_face_names[best_match_index]
                             self.response(True, name, confidence)
-                            self.obj.check(self.obj.get_id(name))
+                            self.obj.check(self.obj.get_id(name),id)
                             # print(self.obj.check(self.obj.get_id(name)))
                         else:
                             self.response(True, "unknown", confidence)
+
+                self.image_processed(id)
 
         def start(self):
             t = threading.Thread(target=self.detect_faces)
@@ -288,19 +349,27 @@ class control():
             self.flagRestart = False
             print("SUCCESS : Detect restarted!")
 
-        class Server():
-
-            def __init__(self, obj):
+        
+        class Client():
+            
+            def __init__(self,obj,IP_ADDR,IP_PORT,Type,id):
+                self.obj = obj
                 self.IP_ADDR = IP_ADDR
                 self.IP_PORT = IP_PORT
-                self.obj = obj
+                self.Type = Type
+                self.id = id
+                self.msg=""
 
-            def start_server(self):
+            def get_msg(self):
+                time.sleep(0.5)
+                yield self.msg
+            
+            def start_client(self):
                 t = threading.Thread(target=self.start)
                 t.start()
-
+            
             def start(self):
-                msg = "WAITING : Waiting for Connection"
+                msg = f"WAITING : Waiting for Connection on {self.IP_ADDR}:{self.IP_PORT}"
                 self.obj.obj.log.log(msg)
                 print(msg)
 
@@ -332,10 +401,11 @@ class control():
                         imgdata = base64.b64decode(recv_text)
                         image = cv2.imdecode(np.frombuffer(
                             imgdata, np.uint8), cv2.IMREAD_COLOR)
-                        if(len(self.obj.frame_stack) > 50):
-                            self.obj.fraem_stack = []
+                        
+                        if(self.obj.is_image_in_queue(self.id)):
+                            self.obj.update_image_in_queue(self.id,image)
+
                         # print(image.shape)
-                        self.obj.frame_stack.append(image)
                         # cv2.imshow("server", image)
                         # cv2.waitKey(1)
 
@@ -358,7 +428,10 @@ class control():
                     self.obj.obj.log.log(msg)
                     print(msg)
 
-
 if __name__ == "__main__":
     os.system('cls')
-    # c = control()
+    c = control()
+    c.add_client()
+    c.add_client()
+
+
