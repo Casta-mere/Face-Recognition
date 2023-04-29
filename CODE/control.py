@@ -47,8 +47,7 @@ class control():
     def init_log(self):
         os.system('cls')
         self.log = log.log()
-        self.log.log("====================================================================")
-        self.log.log("NEW INSTANCE RUNNING")
+        
 
     def init_db(self):
         self.database = database.my_sql('facerecognition')
@@ -181,12 +180,15 @@ class control():
 
         self.database.delete_table_entry('info', userid)
         self.database.delete_table_entry('entry', userid)
-        addface.deleteface(userid)
+        state,msg=addface.deleteface(userid)
+        
+        self.log.log(msg)
+
         self.load_info()
         self.renew_status()
         self.recognition.load_faces(self.info)
 
-        msg = f"SUCCESS : user {username} deleted!"
+        msg = f"SUCCESS : user {username} (usrid {userid}) deleted!"
         self.log.log(msg)
         msg = f"SUCCESS : 用户{username}删除成功"
         return True, msg
@@ -280,7 +282,7 @@ class control():
 
         def stop(self):
             self.flagRestart = True
-            print("ALERT : Detect stopped!")
+            print("WAITING : Detect stopped!")
 
         def restart(self):
             self.flagRestart = False
@@ -298,7 +300,7 @@ class control():
                 t.start()
 
             def start(self):
-                msg = "ALERT : Waiting for Connection"
+                msg = "WAITING : Waiting for Connection"
                 self.obj.obj.log.log(msg)
                 print(msg)
 
@@ -349,10 +351,10 @@ class control():
                     await self.serverRecv(websocket)
                 except websockets.exceptions.ConnectionClosed:
                     self.obj.flagDetect = False
-                    msg = f"ALERT : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
+                    msg = f"SUCCESS : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
                     self.obj.obj.log.log(msg)
                     print(msg)
-                    msg = f"ALERT : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
+                    msg = f"WAITING : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
                     self.obj.obj.log.log(msg)
                     print(msg)
 
