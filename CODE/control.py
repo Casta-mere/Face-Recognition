@@ -74,7 +74,7 @@ class control():
         print(msg)
         self.log.log(msg)
 
-        ms+=f"SUCCESS : Totoal {len(self.clientDict)} clients : {list(self.clientDict.keys())}"
+        msg=f"SUCCESS : Totoal {len(self.clientDict)} clients : {list(self.clientDict.keys())}"
         print(msg)
         self.log.log(msg)
         
@@ -94,6 +94,7 @@ class control():
 
     def get_msg(self,clientid):
         msg=self.clientDict[clientid].get_msg()
+        # print(msg)
         return msg
 
     def get_id(self, username):
@@ -249,8 +250,8 @@ class control():
 
             self.load_faces(dictionary)
 
-            self.flagDetect = False
-            self.falgRestart = False
+            self.flagDetect = True
+            self.flagRestart = False
             self.flagLoad = False # weather is loading faces
             # self.server = control.recognize.Server(self)
             # self.server.start_server()
@@ -306,7 +307,7 @@ class control():
 
         def detect_faces(self):
             while True:
-                if self.falgRestart:
+                if self.flagRestart:
                     continue
                 if not self.flagDetect:
                     continue
@@ -318,7 +319,6 @@ class control():
                 
                 # frame = self.frame_stack.pop()
                 # self.frame_stack = []
-
                 info = self.frame_queue.pop()
                 id=info[0]
                 frame=info[1]
@@ -442,10 +442,10 @@ class control():
                     msg = f"SUCCESS : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
                     self.obj.obj.log.log(msg)
                     print(msg)
-                    self.obj.obj.del_client(self.id)
-                    # msg = f"WAITING : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
-                    # self.obj.obj.log.log(msg)
-                    # print(msg)
+                    # self.obj.obj.del_client(self.id)
+                    msg = f"WAITING : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
+                    self.obj.obj.log.log(msg)
+                    print(msg)
 
 if __name__ == "__main__":
     os.system('cls')
