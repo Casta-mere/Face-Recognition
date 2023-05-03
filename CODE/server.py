@@ -1,48 +1,79 @@
-from flask import Flask, render_template, request,redirect,url_for,globals,abort
+from flask import Flask, render_template, request,redirect,url_for,abort,session
 import json
 import cv2
 import numpy
 import base64
-import threading
 import control
+import os
+
+def secretKey():
+    key_bytes = os.urandom(16)
+    key = key_bytes.hex()
+    return key
 
 app = Flask(__name__) 
- 
-globals.loginState=0
-globals.password="123456"
-globals.retry=0
-globals.controls=control.control()
-globals.deleteName=""
-globals.msg=""
-temp_ip=control.IP_ADDR
-temp_port=control.IP_PORT
+app.secret_key = secretKey()
+ctrl = control.control()
 
-def m():
-    while True:
-        for i in globals.controls.get_msg():
-            globals.msg=i
-
-t=threading.Thread(target=m)
-t.start()
-
-# 首页
+# 初始化
 @app.route('/',methods=['GET','POST'])
 def hello_world():
-    ipContent="wss://"+temp_ip+":"+temp_port
-    return render_template(
-        'firstPage.html',
-        state=globals.loginState,
-        ip=ipContent
-        )
+    
+    session['loginState']=0
+    session['password']="123456"
+    session['retry']=0
+    session['deleteName']=""
+    session['msg']=""
+    session['ip']=control.IP_ADDR
+    session['id'],client=ctrl.add_client()
+    session['port']=str(session['id'])
+    # def m():
+    #     while True:
+    #         with app.test_request_context('/'):
+    #             for i in client.get_msg():
+    #                 session['msg']=i
+    #                 session.modified = True
+    #                 print(id(session['msg']),1)
+    #                 print(session['msg'])
+
+    # t=threading.Thread(target=m)
+    # t.start()
+    # app.app_context().push()
+
+    return redirect(url_for('home'))
+    # return redirect(url_for('settings'))
+
+# 选择设备
+@app.route('/settings',methods=['GET','POST'])
+def settings():
+    return render_template('initialDev.html')
+
+@app.route('/chooseDev',methods=['GET','POST'])
+def chooseDevice():
+    return render_template('deviceSettings.html')
+
+# 首页
+@app.route('/Home',methods=['GET','POST'])
+def home():
+    try:
+        ipContent="wss://"+session['ip']+":"+session['port']
+        print(session['loginState'])
+        return render_template(
+            'firstPage.html',
+            state=session['loginState'],
+            ip=ipContent
+            )
+    except:
+        return redirect(url_for('hello_world'))
 
 @app.route('/getState',methods=['GET','POST'])
 def getState():
-    return globals.msg
+    return ctrl.get_msg(session['id'])
 
 # 录入人脸界面
 @app.route('/imgUpload',methods=['GET','POST'])
 def imageUpload():
-    if globals.loginState==0:
+    if session['loginState']==0:
         abort(403)
     return render_template('faceRecog.html')
 
@@ -53,10 +84,12 @@ def receive_image():
     if request.method == "POST":
         data = request.data.decode('utf-8')
         json_data = json.loads(data)
+        # Start
         str_image = json_data["imgData"]
         img = base64.b64decode(str_image)
         img_np = numpy.frombuffer(img, dtype='uint8')
         new_img_np = cv2.imdecode(img_np, 1)
+        # end
         try:
             cv2.imwrite('face/faceImg/source.jpg',new_img_np)
             print('SUCCESS : {}'.format('load image success!'))
@@ -73,7 +106,7 @@ def sendInfo():
     # print(data)
     name=data['name']
     email=data['email']
-    con,msg=globals.controls.adduser(name,email)
+    con,msg=ctrl.adduser(name,email)
     print(msg)
     return msg
     # return redirect(url_for('hello_world'))
@@ -81,50 +114,51 @@ def sendInfo():
 # 删除信息
 @app.route('/manageInfo',methods=['GET','POST'])
 def manageInfo():
-    if globals.loginState==0:
+    if session['loginState']==0:
         abort(403)
     return render_template('manageInfo.html')
 
 # 显示信息
 @app.route('/deleteInfo',methods=['GET','POST'])
 def deleteInfo():
-    if globals.loginState==0:
+    if session['loginState']==0:
         abort(403)
     name=list(request.args.to_dict().keys())[0]
     name=json.loads(name)
     name=name['delName']
     # print(name)
-    con,msg=globals.controls.deleteuser(name)
+    con,msg=ctrl.deleteuser(name)
     print(msg)
     return msg
 
 # 登录界面
 @app.route('/login',methods=['POST','GET'])
 def login():
-    if globals.loginState==0:
+    if session['loginState']==0:
         return render_template(
             'login.html',
-            retry=globals.retry
+            retry=session['retry']
             )
     else:
-        return redirect(url_for('hello_world'))
+        return redirect(url_for('adminPage'))
 
 # 检查是否为管理员
 @app.route('/loginCheck',methods=['GET','POST'])
 def loginCheck():
     password=request.values.get('password')
     # print(password)
-    if globals.password==password:
-        globals.loginState=1
-        return redirect(url_for('hello_world'))
+    if session['password']==password:
+        session['loginState']=1
+        session.modified = True
+        return redirect(url_for('adminPage'))
     else:
-        globals.retry=1
+        session['retry']=1
         return redirect(url_for('login'))
 
 # 管理员页面
 @app.route('/adminPage',methods=['GET','POST'])
 def adminPage():
-    if globals.loginState==0:
+    if session['loginState']==0:
         abort(403)
     return render_template(
         'adminPage.html'

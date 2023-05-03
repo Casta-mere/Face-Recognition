@@ -1,134 +1,162 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!DOCTYPE html>
+<html>
+
+  <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link rel="icon" href="static/images/favicon.png" type="image/gif" />
-    <meta name="keywords" content="" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <title>Camera Preview</title>
-    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.css" />
-    <link href="static/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="static/css/style.css" rel="stylesheet" />
-    <link href="static/css/responsive.css" rel="stylesheet" />
-</head>
-<body>
+    <title>实验室打卡系统</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/static/css/style.css" rel="stylesheet" />
+    <link href="/static/css/responsive.css" rel="stylesheet" />
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    
 
+  </head>
 
-    <header class="header_section">
+  <body class="sub_page">
+    <div class="hero_area">
+      <header class="header_section">
         <div class="container-fluid">
           <nav class="navbar navbar-expand-lg custom_nav-container ">
             <a class="navbar-brand" href="/">
-              <span>
-                Camera Preview
-              </span>
+              <span>实验室打卡系统</span>
             </a>
           </nav>
         </div>
       </header>
-      <section class="catagory_section layout_padding">
-        <div class="row">
-          <!--a标签的样式已经被改成跟button差不多的玩意儿了-->
-          <video class = "m-auto" id="video-preview" autoplay></video>
+    </div>
+
+    <section class="contact_section layout_padding">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-3 ">
+              <div class="heading_container ">
+                <h2 class="">请输入姓名：</h2>
+                <h2 class="">{{ip}}</h2>
+                <h2 class="">{{loginState}}</h2>
+                <h2 class="">{{password}}</h2>
+                <h2 class="">{{retry}}</h2>
+                <h2 class="">{{msg}}</h2>
+              </div>
+            </div>
+            <div class="col-md-6 ">
+                <div id="delName0" name="delName0">
+                  <input id="delName" name="delName" value="{{delName}}" type="text" placeholder="姓名" />
+                  <div class="btn-box">
+                    <button onclick="check()">查看</button>
+                    <button onclick="check2()">查看2</button>
+                    <button onclick="check3()">查看3</button>
+                  </div>
+                </div>
+                <div>
+                  <br><br>
+                  <h3 id="waitDel" class="m-auto"></h3>
+                </div>
+            </div>
+            <div class="col-md-2">
+              
+            </div>
+            <div class="col-md-2">
+              <div class="btn-box">
+                
+              </div>
+          </div>
         </div>
       </section>
 
+    <section class="catagory_section layout_padding">
+      <div class="catagory_container">
+        <div class="container ">
+          <br>
+          <div class="row">
+            <h2 class="m-auto" id="rcg"></h2>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <input type="button" title="开启摄像头" value="开启摄像头" onclick="getMedia()" />
-    <video id="video" width="500px" height="500px" autoplay="autoplay"></video>
-    <canvas id="canvas" width="500px" height="500px"></canvas>
-    <button id="close" onclick="closeMedia()">关闭摄像头</button>
-    <button id="return" onclick="turnBack()">返回</button>
-    <button id="upload" onclick="uploadImage()">拍照上传</button>
-    <script src='static/js/camera.js'></script>
-    <script src='static/js/jquery-1.7.1.min.js'></script>
 
     <script>
-        function closeMedia() {
-                var video = document.getElementById('video');
-                if (!video.srcObject) return
-                let stream = video.srcObject
-                let tracks = stream.getTracks();
-                tracks.forEach(track => {
-                    track.stop()
-                })
-        }
-
-        //获得video摄像头区域
-        let video = document.getElementById("video");
-        function getMedia() {
-            let constraints = {
-                video: {width: 500, height: 500},
-                audio: true
-            };
-            /*
-            这里介绍新的方法:H5新媒体接口 navigator.mediaDevices.getUserMedia()
-            这个方法会提示用户是否允许媒体输入,(媒体输入主要包括相机,视频采集设备,屏幕共享服务,麦克风,A/D转换器等)
-            返回的是一个Promise对象。
-            如果用户同意使用权限,则会将 MediaStream对象作为resolve()的参数传给then()
-            如果用户拒绝使用权限,或者请求的媒体资源不可用,则会将 PermissionDeniedError作为reject()的参数传给catch()
-            */
-            let promise = navigator.mediaDevices.getUserMedia(constraints);
-            promise.then(function (MediaStream) {
-                video.srcObject = MediaStream;
-                video.play();
-            }).catch(function (PermissionDeniedError) {
-                console.log(PermissionDeniedError);
-            })
-        }
-
-        function takePhoto() {
-            //获得Canvas对象
-            let canvas = document.getElementById("canvas");
-            let ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, 500, 500);
-        }
-
-        //图片上传到服务器
-        //获取Canvas的编码
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        function uploadImage(){
-            canvas.width = 500;
-            canvas.height = 500;
-            context.drawImage(video, 0, 0, 500, 500);
-            var imgData = canvas.toDataURL("image/jpg");
-            imgData = imgData.replace(/^data:image\/(png|jpg);base64,/,"")
-            //上传到后台。
-            var uploadAjax = $.ajax({
-                type: "post",
-                //后端需要调用的地址
-                url:"/receiveImage",
-                data: JSON.stringify({"imgData": imgData}),
-                contentType:"json/application",
-                //设置超时
-                timeout:10000,
-                async: true,
-                success: function (htmlVal) {
-                    //成功后回调
-                },
-                error: function(data) {
-                },
-                //调用执行后调用的函数
-                complete: function (XMLHttpRequest, textStatus) {
-                    if(textStatus == 'timeout'){
-                        uploadAjax.abort(); //取消请求
-                        //超时提示：请求超时，请重试
-                        alert("请求超时，请重试")
-                        //请求超时返回首页
-                        closeCard();
-                    }
+        function check() {
+          var nData = document.getElementById('delName').value;
+          console.log(nData);
+          var uploadAjax = $.ajax({
+            url:"/check",
+            type: "get",
+            dataType: "text",
+            data: JSON.stringify({"delName": nData}),
+            contentType:"json/application",
+            timeout:1500000,
+            async: true,
+            success: function (msg) {
+                $("#rcg").html(msg);
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if(textStatus == 'timeout'){
+                    uploadAjax.abort(); 
+                    alert("请求超时，请重试")
                 }
-            });
+            }
+        });
         }
+      </script>
 
-        function turnBack() {
-            window.location.href = "/";
+      <script>
+        function check2() {
+          var nData = document.getElementById('delName').value;
+          console.log(nData);
+          var uploadAjax = $.ajax({
+            url:"/check2",
+            type: "get",
+            dataType: "text",
+            data: JSON.stringify({"delName": nData}),
+            contentType:"json/application",
+            timeout:1500000,
+            async: true,
+            success: function (msg) {
+                $("#rcg").html(msg);
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if(textStatus == 'timeout'){
+                    uploadAjax.abort(); 
+                    alert("请求超时，请重试")
+                }
+            }
+        });
         }
+      </script>
 
+      <script>
+        function check3() {
+          var nData = document.getElementById('delName').value;
+          console.log(nData);
+          var uploadAjax = $.ajax({
+            url:"/check3",
+            type: "get",
+            dataType: "text",
+            data: JSON.stringify({"delName": nData}),
+            contentType:"json/application",
+            timeout:1500000,
+            async: true,
+            success: function (msg) {
+                $("#rcg").html(msg);
+            },
+            complete: function (XMLHttpRequest, textStatus) {
+                if(textStatus == 'timeout'){
+                    uploadAjax.abort(); 
+                    alert("请求超时，请重试")
+                }
+            }
+        });
+        }
+      </script>
 
-    </script>
-</body>
+      
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    
+
+  </body>
 </html>
