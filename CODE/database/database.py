@@ -9,7 +9,7 @@ from Log import log
 # local
 host = 'localhost'
 user = 'root'
-password = 'aaa6953217'
+password = ''
 
 # server
 
@@ -171,8 +171,19 @@ def reset():
     entry2 = [2, '韦杨婧', '2020-01-01', '08:00:00', '09:00:00', False]
     entry3 = [3, '刘俊伟', '2020-01-01', '08:00:00', '09:00:00', False]
 
+    table_device = "device"
+    colunm_device = []
+    colunm_device.append(['id', 'int(11)'])
+    colunm_device.append(['name', 'varchar(255)'])
+    colunm_device.append(['tpye', 'tinyint(1)'])
+    
+    # 0: in, 1: out, 2: in&out
+    device1 = [1, '10-409前门外', 0]
+    device3 = [2, '10-409前门内', 1]
+    device2 = [3, '10-409后门', 2]
+
     db = my_sql("facerecognition")
-    print(db.boot_selftest)
+    print(db.boot_selftest())
 
     db.Create_Database()
     db.Create_table(tabname_info, column_info)
@@ -185,6 +196,11 @@ def reset():
     db.add_new_entry(tabname_entry, entry2)
     db.add_new_entry(tabname_entry, entry3)
 
+    db.Create_table(table_device, colunm_device)
+    db.add_new_entry(table_device, device1)
+    db.add_new_entry(table_device, device2)
+    db.add_new_entry(table_device, device3)
+
 
 def showlist(L):
     for i in L:
@@ -194,13 +210,13 @@ def showlist(L):
 
 
 if __name__ == "__main__":
-    # reset()
-    db=my_sql("facerecognition")
-    db.boot_selftest()
-    print(db.execute_sql("select * from info"))
-    find=[["id","1"],["name","王旭刚"]]
-    change=[["name","王旭刚"],["timee","18:00:00"]]
-    db.update_table("entry",find,change)
+    reset()
+    # db=my_sql("facerecognition")
+    # db.boot_selftest()
+    # print(db.execute_sql("select * from info"))
+    # find=[["id","1"],["name","王旭刚"]]
+    # change=[["name","王旭刚"],["timee","18:00:00"]]
+    # db.update_table("entry",find,change)
 
     # print(db.get_newest_data("entry",2))
     # showlist(db.get_newest_data("entry",3))
