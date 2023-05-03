@@ -19,7 +19,7 @@ import ssl
 
 time_sep = 300              # 间隔时间
 IP_ADDR = IP.get_ip()       # 服务器IP地址
-IP_PORT = "8888"            # 服务器端口号
+IP_PORT = 8100           # 服务器端口号
 sourcedir = 'face/faceImg/source.jpg'
 
 
@@ -40,28 +40,14 @@ class control():
         self.recognition.start()
     
         self.clientDict={}
+        self.IP_PORT=8100
 
         success = "SUCCESS : Server is running on https://{}:{}".format(
             IP_ADDR, "8500")
         print(success)
         self.log.log(success)
 
-    def add_client(self):
-        if(len(self.clientDict.keys())==0):
-            PORT=8100
-        else:
-            PORT=max(self.clientDict.keys())+1
-        msg,client=self.recognition.add_client(PORT,1)
-
-        self.log.log(msg)
-        self.clientDict[PORT]=client
-        return PORT,client
-        
-    def del_client(self,PORT):
-        self.recognition.del_client(PORT)
-        del self.clientDict[PORT]
-
-        
+    
     def init_log(self):
         os.system('cls')
         self.log = log.log()
@@ -73,6 +59,42 @@ class control():
         print(msg)
         if not state:
             sys.exit(0)
+
+    def add_client(self):
+        if(self.IP_PORT==8200):
+            self.IP_PORT=8100
+        if(self.IP_PORT in self.clientDict.keys()):
+            self.IP_PORT+=1
+
+        msg,client=self.recognition.add_client(self.IP_PORT,1)
+
+        self.clientDict[self.IP_PORT]=client
+
+        msg=f"SUCCESS : Add new Client {self.IP_PORT}"
+        print(msg)
+        self.log.log(msg)
+
+        ms+=f"SUCCESS : Totoal {len(self.clientDict)} clients : {list(self.clientDict.keys())}"
+        print(msg)
+        self.log.log(msg)
+        
+        return self.IP_PORT,client
+        
+    def del_client(self,PORT):
+        self.recognition.del_client(PORT)
+        del self.clientDict[PORT]
+
+        msg=f"SUCCESS : Remove Client {PORT}"
+        print(msg)
+        self.log.log(msg)
+
+        msg=f"SUCCESS : Totoal {len(self.clientDict)} clients : {list(self.clientDict.keys())}"
+        print(msg)
+        self.log.log(msg)
+
+    def get_msg(self,clientid):
+        msg=self.clientDict[clientid].get_msg()
+        return msg
 
     def get_id(self, username):
         dict = {v[0]: k for k, v in self.info.items()}
@@ -134,7 +156,7 @@ class control():
     def check(self, userid, id):
         valid = self.is_valid(userid)
         status = self.user_status[userid][0]
-        client=self.clientDict[id]
+        client = self.clientDict[id]
         client.msg = ""
 
         if(not valid and status):
@@ -260,7 +282,7 @@ class control():
             self.client[id][1]=True
         
         def image_processed(self,id):
-            print(f'processed with device {id}')
+            # print(f'processed with device {id}')
             self.client[id][1]=False
             # pass
 
@@ -270,10 +292,8 @@ class control():
 
             return "SUCCESS",self.client[PORT][0]
 
-
         def del_client(self,IP_PORT):
             del self.client[IP_PORT]
-
 
         def response(self, state, name="", confidence=0):
             if state == True:
@@ -326,6 +346,7 @@ class control():
                             # print(self.obj.check(self.obj.get_id(name)))
                         else:
                             self.response(True, "unknown", confidence)
+                            self.obj.clientDict[id].msg = ""
 
                 self.image_processed(id)
 
@@ -341,7 +362,6 @@ class control():
             self.flagRestart = False
             print("SUCCESS : Detect restarted!")
 
-        
         class Client():
             
             def __init__(self,obj,IP_ADDR,IP_PORT,Type,id):
@@ -353,8 +373,7 @@ class control():
                 self.msg=""
 
             def get_msg(self):
-                time.sleep(0.5)
-                yield self.msg
+                return self.msg
             
             def start_client(self):
                 t = threading.Thread(target=self.start)
@@ -386,6 +405,13 @@ class control():
             # receive the video from client and show it in the window using opencv
             async def serverRecv(self, websocket):
                 while True:
+                    
+                    # add timeout to del the client
+                    # try:
+                    #     recv_text = await asyncio.wait_for(websocket.recv(), timeout=200)
+                    # except:
+                    #     print(f"ERROR : TIMEOUT {self.IP_PORT}")
+                    #     break
                     recv_text = await websocket.recv()
                     if "data:image/jpeg;base64," in recv_text:
                         recv_text = recv_text.replace(
@@ -408,17 +434,18 @@ class control():
                 self.obj.obj.log.log(msg)
                 print(msg)
 
-                self.obj.flagDetect = True
+                # self.obj.flagDetect = True
                 try:
                     await self.serverRecv(websocket)
                 except websockets.exceptions.ConnectionClosed:
-                    self.obj.flagDetect = False
+                    # self.obj.flagDetect = False
                     msg = f"SUCCESS : Connection closed on {self.IP_ADDR}:{self.IP_PORT}"
                     self.obj.obj.log.log(msg)
                     print(msg)
-                    msg = f"WAITING : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
-                    self.obj.obj.log.log(msg)
-                    print(msg)
+                    self.obj.obj.del_client(self.id)
+                    # msg = f"WAITING : Waiting for Reconnection on {self.IP_ADDR}:{self.IP_PORT}"
+                    # self.obj.obj.log.log(msg)
+                    # print(msg)
 
 if __name__ == "__main__":
     os.system('cls')
