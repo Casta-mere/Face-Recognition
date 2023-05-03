@@ -39,11 +39,7 @@ class control():
         self.recognition = control.recognize(self.info, self)
         self.recognition.start()
     
-        
         self.clientDict={}
-
-        self.msg = ""
-
 
         success = "SUCCESS : Server is running on https://{}:{}".format(
             IP_ADDR, "8500")
@@ -77,10 +73,6 @@ class control():
         print(msg)
         if not state:
             sys.exit(0)
-
-    def get_msg(self):
-        time.sleep(0.5)
-        yield self.msg
 
     def get_id(self, username):
         dict = {v[0]: k for k, v in self.info.items()}
@@ -139,7 +131,7 @@ class control():
         else:
             return False
 
-    def check(self, userid,id):
+    def check(self, userid, id):
         valid = self.is_valid(userid)
         status = self.user_status[userid][0]
         client=self.clientDict[id]
