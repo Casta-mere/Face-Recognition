@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,redirect,url_for,globals
+from flask import Flask, render_template, request,redirect,url_for,globals,abort
 import json
 import cv2
 import numpy
@@ -42,6 +42,8 @@ def getState():
 # 录入人脸界面
 @app.route('/imgUpload',methods=['GET','POST'])
 def imageUpload():
+    if globals.loginState==0:
+        abort(403)
     return render_template('faceRecog.html')
 
 # 接收人脸图片并保存
@@ -79,11 +81,15 @@ def sendInfo():
 # 删除信息
 @app.route('/manageInfo',methods=['GET','POST'])
 def manageInfo():
+    if globals.loginState==0:
+        abort(403)
     return render_template('manageInfo.html')
 
 # 显示信息
 @app.route('/deleteInfo',methods=['GET','POST'])
 def deleteInfo():
+    if globals.loginState==0:
+        abort(403)
     name=list(request.args.to_dict().keys())[0]
     name=json.loads(name)
     name=name['delName']
@@ -118,6 +124,8 @@ def loginCheck():
 # 管理员页面
 @app.route('/adminPage',methods=['GET','POST'])
 def adminPage():
+    if globals.loginState==0:
+        abort(403)
     return render_template(
         'adminPage.html'
         )
