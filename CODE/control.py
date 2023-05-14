@@ -4,14 +4,16 @@ from face import addface
 from IP import IP
 from Log import log
 
+import dlib
+import csv
 import time
 import datetime
 import asyncio
 import base64
 import threading
 import websockets
-import face_recognition
 import numpy as np
+import pandas as pd
 import os
 import cv2
 import sys
@@ -20,7 +22,11 @@ import ssl
 time_sep = 300              # 间隔时间
 IP_ADDR = IP.get_ip()       # 服务器IP地址
 IP_PORT = 8100           # 服务器端口号
-sourcedir = 'face/faceImg/source.jpg'
+source_pic_dir = 'face/faceImg/source.jpg'
+source_csv_dir = 'face/faceImg/features.csv'
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor('face/data_dlib/shape_predictor_68_face_landmarks.dat')
+face_reco_model = dlib.face_recognition_model_v1("face/data_dlib/dlib_face_recognition_resnet_model_v1.dat")
 
 
 class control():
@@ -46,8 +52,7 @@ class control():
             IP_ADDR, "8500")
         print(success)
         self.log.log(success)
-
-    
+ 
     def init_log(self):
         os.system('cls')
         self.log = log.log()
@@ -195,7 +200,7 @@ class control():
             self.initial_user(userid)
             self.renew_status()
 
-            self.recognition.load_faces(self.info)
+            self.recognition.update_faces_add(self.info)
             self.recognition.restart()
 
             msg = f"SUCCESS : 新用户{name}添加成功"
@@ -217,13 +222,13 @@ class control():
 
         self.database.delete_table_entry('info', userid)
         self.database.delete_table_entry('entry', userid)
-        state,msg=addface.deleteface(userid)
+        state, msg = addface.deleteface(userid)
         
         self.log.log(msg)
 
         self.load_info()
         self.renew_status()
-        self.recognition.load_faces(self.info)
+        self.recognition.update_faces_delete(username)
 
         msg = f"SUCCESS : user {username} (usrid {userid}) deleted!"
         self.log.log(msg)
@@ -234,19 +239,13 @@ class control():
 
         def __init__(self, dictionary, obj):
             self.obj = obj
-            self.known_face_encodings = []
+            self.features_known_list = []
             self.known_face_names = []
             self.img_path = 'face/faceImg'
-            self.npy_path = 'face/faceNpy'
 
             self.frame_queue = []
 
             self.client={}
-
-            self.frame_stack = []
-            self.width = 0
-            self.height = 0
-            self.target_size = (1500, 1500)
 
             self.load_faces(dictionary)
 
@@ -259,21 +258,54 @@ class control():
         def load_faces(self, dictionary):
             t=time.time()
             self.flagLoad = True
-            self.known_face_encodings = []
+            self.features_known_list = []
             self.known_face_names = []
-            for i in dictionary.keys():
-                npy_path = f'{self.npy_path}/{i}.npy'
-                try:
-                    face_encoding = np.load(npy_path)
-                    self.known_face_encodings.append(face_encoding)
-                    self.known_face_names.append(dictionary[i][0])
-                except Exception as e:
-                    self.obj.log.log("ERROR : "+str(e)+" in load_faces")
-                    print(f"ERROR : {dictionary[i]} not exist")
+
+            # print(dictionary.keys())
+            with open(source_csv_dir,'r') as file:
+                reader=csv.reader(file)
+                for i in reader:
+                    id = eval(i[0])
+                    if(id not in dictionary.keys()):
+                        continue
+                    # print(f"id = {id}")
+                    face_encoding = [float(x) for x in i[1:]]
+                    self.known_face_names.append(dictionary[id][0])
+                    self.features_known_list.append(face_encoding)
+
+
+                    # self.obj.log.log("ERROR : "+str(e)+" in load_faces")
+                    # print(f"ERROR : {dictionary[i]} not exist")
             
             self.flagLoad = False
             print("load faces cost : "+str(time.time()-t))
-            print(f"total {len(self.known_face_encodings)} faces loaded")
+            print(f"total {len(self.known_face_names)} faces loaded")
+
+        def update_faces_add(self,dictionary):
+            self.flagLoad = True
+
+            csv_rd = pd.read_csv(source_csv_dir, header=None)
+            id = csv_rd.iloc[-1][0]
+            name = dictionary[id][0]
+            feature = csv_rd.iloc[-1][1:].values.astype(float).tolist()
+
+            self.known_face_names.append(name)
+            self.features_known_list.append(feature) 
+
+            self.flagLoad = False
+
+        def update_faces_delete(self, username):
+            self.flagLoad = True
+
+            for i in self.known_face_names:
+                if (username == i):
+                    self.features_known_list.pop(self.known_face_names.index(i))
+                    self.known_face_names.remove(i)
+                    print("remove "+i+" from known_face_names")
+                    break
+            
+            self.flagLoad = False
+            
 
         def is_image_in_queue(self,id):
             return not self.client[id][1]
@@ -303,7 +335,14 @@ class control():
             else:
                 # print("ERROR : no face recognized")
                 self.obj.msg = ""
-                # return("ERROR : no face recognized")
+                return("ERROR : no face recognized")
+
+        @staticmethod
+        def return_euclidean_distance(feature_1, feature_2):
+            feature_1 = np.array(feature_1)
+            feature_2 = np.array(feature_2)
+            dist = np.sqrt(np.sum(np.square(feature_1 - feature_2)))
+            return dist
 
         def detect_faces(self):
             while True:
@@ -317,36 +356,57 @@ class control():
                     continue
                 
                 
-                # frame = self.frame_stack.pop()
-                # self.frame_stack = []
                 info = self.frame_queue.pop()
                 id=info[0]
                 frame=info[1]
-                # frame=cv2.resize(frame,self.target_size)
-                # cv2.imwrite(sourcedir,frame)
 
-                face_locations = face_recognition.face_locations(frame)
-                face_encodings = face_recognition.face_encodings(
-                    frame, face_locations)
-                if len(face_locations) == 0:
-                    self.response(False)
+                faces = detector(frame, 0)
+                face_cnt = len (faces)
+
+                if face_cnt != 1:
+                    pass
                 else:
-                    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                        matches = face_recognition.compare_faces(
-                            self.known_face_encodings, face_encoding)
-                        name = "Unknown"
-                        face_distances = face_recognition.face_distance(
-                            self.known_face_encodings, face_encoding)
-                        best_match_index = np.argmin(face_distances)
-                        confidence = 1 - face_distances[best_match_index]
-                        if matches[best_match_index] and confidence > 0.6:
-                            name = self.known_face_names[best_match_index]
-                            self.response(True, name, confidence)
-                            self.obj.check(self.obj.get_id(name),id)
-                            # print(self.obj.check(self.obj.get_id(name)))
-                        else:
-                            self.response(True, "unknown", confidence)
-                            self.obj.clientDict[id].msg = ""
+                    shape = predictor(frame, faces[0])
+                    current_face_feature = face_reco_model.compute_face_descriptor(frame, shape)
+                    current_face_X_e_distance_list = []
+
+                    for i in range(len(self.features_known_list)):
+                        e_distance_tmp = self.return_euclidean_distance(current_face_feature, self.features_known_list[i])
+                        current_face_X_e_distance_list.append(e_distance_tmp)
+
+                    similar_person_num = np.argmin(current_face_X_e_distance_list)
+
+                    if current_face_X_e_distance_list[similar_person_num] < 0.4:
+                        name = self.known_face_names[similar_person_num]
+                        confidence = 1 - current_face_X_e_distance_list[similar_person_num]
+                        self.response(True, name, confidence)
+                        self.obj.check(self.obj.get_id(name),id)
+                    else:
+                        self.response(True, "unknown", current_face_X_e_distance_list[similar_person_num])
+                        self.obj.clientDict[id].msg = ""
+
+                # face_locations = face_recognition.face_locations(frame)
+                # face_encodings = face_recognition.face_encodings(
+                #     frame, face_locations)
+                # if len(face_locations) == 0:
+                #     self.response(False)
+                # else:
+                #     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                #         matches = face_recognition.compare_faces(
+                #             self.known_face_encodings, face_encoding)
+                #         name = "Unknown"
+                #         face_distances = face_recognition.face_distance(
+                #             self.known_face_encodings, face_encoding)
+                #         best_match_index = np.argmin(face_distances)
+                #         confidence = 1 - face_distances[best_match_index]
+                #         if matches[best_match_index] and confidence > 0.6:
+                #             name = self.known_face_names[best_match_index]
+                #             self.response(True, name, confidence)
+                #             self.obj.check(self.obj.get_id(name),id)
+                #             # print(self.obj.check(self.obj.get_id(name)))
+                #         else:
+                #             self.response(True, "unknown", confidence)
+                #             self.obj.clientDict[id].msg = ""
 
                 self.image_processed(id)
 
