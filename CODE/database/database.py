@@ -50,6 +50,7 @@ class my_sql():
         try:
             self.cursor.execute(sql)
             self.conn.commit()
+            self.log.log("SUCCESS : "+sql)
             return self.cursor.fetchall()
         except Exception as e:
             self.log.log("ERROR : "+str(e))
@@ -150,26 +151,26 @@ class my_sql():
 def reset():
     tabname_info = "info"
     column_info = []
-    column_info.append(['id', 'int(11)'])
+    column_info.append(['id', 'varchar(255)'])
     column_info.append(['name', 'varchar(255)'])
     column_info.append(['email', 'varchar(255)'])
 
-    info1 = [1, '王旭刚', '2287245796@qq.com']
-    info2 = [2, '韦杨婧', '981193371@qq.com']
-    info3 = [3, '刘俊伟', '1917871807@qq.com']
+    info1 = ["2020329621074", '王旭刚', '2287245796@qq.com']
+    info2 = ["2020329621199", '韦杨婧', '981193371@qq.com']
+    info3 = ["2020329621229", '刘俊伟', '1917871807@qq.com']
 
     tabname_entry = "entry"
     column_entry = []
-    column_entry.append(['id', 'int(11)'])
+    column_entry.append(['id', 'varchar(255)'])
     column_entry.append(['name', 'varchar(255)'])
     column_entry.append(['date', 'date'])
     column_entry.append(['times', 'time'])
     column_entry.append(['timee', 'time'])
     column_entry.append(['bool', 'boolean'])
 
-    entry1 = [1, '王旭刚', '2020-01-01', '08:00:00', '09:00:00', False]
-    entry2 = [2, '韦杨婧', '2020-01-01', '08:00:00', '09:00:00', False]
-    entry3 = [3, '刘俊伟', '2020-01-01', '08:00:00', '09:00:00', False]
+    entry1 = ["2020329621074", '王旭刚', '2020-01-01', '08:00:00', '09:00:00', False]
+    entry2 = ["2020329621199", '韦杨婧', '2020-01-01', '08:00:00', '09:00:00', False]
+    entry3 = ["2020329621229", '刘俊伟', '2020-01-01', '08:00:00', '09:00:00', False]
 
     table_device = "device"
     colunm_device = []
