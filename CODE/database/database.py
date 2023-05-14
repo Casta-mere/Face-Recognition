@@ -1,5 +1,9 @@
 import pymysql
 
+import sys
+sys.path.append(sys.path[0]+'/..')
+from Log import log
+
 # change the following to your own database
 
 # local
@@ -14,34 +18,45 @@ class my_sql():
 
     def __init__(self, database_name):
         self.database_name = database_name
-        state,msg=self.initial()
-        print(msg)
-        if(not state):
-            exit(0)
+        self.log=log.classlog("database")
 
-    def initial(self):
+    # self-test when booting
+    def boot_selftest(self):
+
+        # check if user name and password are correct
         try:
             conn = pymysql.connect(host=host, user=user,
                                    password=password, charset='utf8')
         except:
-            return False,"FAIL : Wrong user name or password for Database!"
+            return False, "FAIL : Wrong user name or password for Database!"
         cursor = conn.cursor()
+
+        # check if database exists, if not create one
         try:
             sql = f"SELECT * FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = '{self.database_name}'"
             cursor.execute(sql)
+            cursor.close()
         except:
+            print("ALERT : Database not found, creating new database...")
             self.Create_Database()
 
-        return True,"SUCCESS : Database connected!"
+        self.conn=pymysql.connect(host=host, user=user,passwd=password, db=self.database_name, charset='utf8')
+        self.cursor=self.conn.cursor()
+
+        return True, "SUCCESS : Database connected!"
 
     def execute_sql(self, sql):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        cursor.execute(sql)
-        cursor.close()
-        conn.commit()
-        conn.close()
+
+        try:
+            self.cursor.execute(sql)
+            self.conn.commit()
+            return self.cursor.fetchall()
+        except Exception as e:
+            self.log.log("ERROR : "+str(e))
+            self.log.log("ERROR : "+sql)
+            self.conn.rollback()
+            print("ERROR : Check your sql syntax!")
+
 
     def Create_Database(self):
         conn = pymysql.connect(host=host, user=user,
@@ -52,6 +67,8 @@ class my_sql():
         cursor.execute("CREATE DATABASE %s" % self.database_name)
         cursor.close()
         conn.close()
+        self.conn=pymysql.connect(host=host, user=user,passwd=password, db=self.database_name, charset='utf8')
+        self.cursor=self.conn.cursor()
 
     def Drop_Database(self):
         conn = pymysql.connect(host=host, user=user,
@@ -61,24 +78,15 @@ class my_sql():
         cursor.execute("DROP DATABASE IF EXISTS %s" % self.database_name)
         cursor.close()
         conn.close()
-
+        
     def Drop_table(self, table_name):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        cursor.execute("DROP TABLE IF EXISTS %s" % table_name)
-        cursor.close()
-        conn.close()
+        sql="DROP TABLE IF EXISTS %s" % table_name
+        self.execute_sql(sql)
 
     def Create_table(self, table_name, columns):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
         self.Drop_table(table_name)
-        cursor.execute("CREATE TABLE %s (%s)" %
-                       (table_name, self.translate(columns)))
-        cursor.close()
-        conn.close()
+        sql="CREATE TABLE %s (%s)" % (table_name, self.translate(columns))
+        self.execute_sql(sql)
 
     def translate(self, column_list):
         column = ''
@@ -86,10 +94,9 @@ class my_sql():
             column += i[0]+' '+i[1]+','
         return column[:-1]
 
+    # add new entry to table "table_name"
     def add_new_entry(self, table_name, item):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
+
         values = ""
         for i in item:
             if(type(i) == str):
@@ -97,107 +104,47 @@ class my_sql():
             else:
                 values += f'{i},'
         sql = f'insert into `{table_name}` values({values[:-1]});'
-        try:
-            cursor.execute(sql)
-            conn.commit()
-        except:
-            conn.rollback()
-            with open("err.txt", "a", encoding="utf-8")as f:
-                f.write(sql+"\n")
-            print("error")
-        cursor.close()
-        conn.close()
+        self.execute_sql(sql)
+
+    def update_table(self, table_name, item_find, item_change):
+        find=str.join(" and ",[f"{i[0]}='{i[1]}'" for i in item_find])
+        change=str.join(",",[f"{i[0]}='{i[1]}'" for i in item_change])
+        sql=f"update {table_name} set {change} where {find};"
+        self.execute_sql(sql)
+
+    def delete_table(self,table_name,item):
+        find=str.join(" and ",[f"{i[0]}='{i[1]}'" for i in item])
+        sql=f"delete from {table_name} where {find};"
+        self.execute_sql(sql)
 
     def update_table_entry(self, id, timee):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        sql = f'update entry set timee="{timee}",bool = 0 where id ="{id}" and bool = 1;'
-        try:
-            cursor.execute(sql)
-            conn.commit()
-        except:
-            conn.rollback()
-            with open("err.txt", "a", encoding="utf-8")as f:
-                f.write(sql+"\n")
-            print("error")
-        cursor.close()
-        conn.close()
+        item_find=[["id",id],["bool",1]]
+        item_change=[["timee",timee],["bool",0]]
+        self.update_table("entry",item_find,item_change)
 
     def delete_table_entry(self, table_name, id):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        sql = f'delete from {table_name} where id ="{id}"'
-        try:
-            cursor.execute(sql)
-            conn.commit()
-        except:
-            conn.rollback()
-            with open("err.txt", "a", encoding="utf-8")as f:
-                f.write(sql+"\n")
-            print("error")
-        cursor.close()
-        conn.close()
+        item=[["id",id]]
+        self.delete_table(table_name,item)
 
     def get_all_data(self, table_name):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        cursor.execute(f'select * from {table_name}')
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return data
+        sql=f'select * from {table_name}'
+        return self.execute_sql(sql)
 
     def get_attributes(self, table_name, attribute):  # attribute is a list
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        values = ""
-        for i in attribute:
-            values += f'{i},'
-        cursor.execute(f'select {values[:-1]} from {table_name}')
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return data
+        sql=f'select {",".join(attribute)} from {table_name}'
+        return self.execute_sql(sql)
 
     def get_all_data_by_sepecific_attribute_value(self, table_name, attr_name, attr_value):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        cursor.execute(
-            f'select * from {table_name} where {attr_name}="{attr_value}"')
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return data
+        sql=f'select * from {table_name} where {attr_name}="{attr_value}"'
+        return self.execute_sql(sql)
 
     def get_attributes_by_sepecific_attribute_value(self, table_name, attr_name, attr_value, attribute):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        values = ""
-        for i in attribute:
-            values += f'{i},'
-        cursor.execute(
-            f'select {values[:-1]} from {table_name} where {attr_name}="{attr_value}"')
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return data
+        sql=f'select {",".join(attribute)} from {table_name} where {attr_name}="{attr_value}"'
+        return self.execute_sql(sql)
 
     def get_newest_data(self, table_name, id):
-        conn = pymysql.connect(host=host, user=user, password=password,
-                               database=self.database_name, charset='utf8')
-        cursor = conn.cursor()
-        cursor.execute(
-            f'select * from {table_name} where id={id} order by date desc,times desc limit 1')
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return data
+        sql=f'select * from {table_name} where id={id} order by date desc, times desc limit 1'
+        return self.execute_sql(sql)
 
 
 def reset():
@@ -224,7 +171,19 @@ def reset():
     entry2 = [2, '韦杨婧', '2020-01-01', '08:00:00', '09:00:00', False]
     entry3 = [3, '刘俊伟', '2020-01-01', '08:00:00', '09:00:00', False]
 
+    table_device = "device"
+    colunm_device = []
+    colunm_device.append(['id', 'int(11)'])
+    colunm_device.append(['name', 'varchar(255)'])
+    colunm_device.append(['tpye', 'tinyint(1)'])
+    
+    # 0: in, 1: out, 2: in&out
+    device1 = [1, '10-409前门外', 0]
+    device3 = [2, '10-409前门内', 1]
+    device2 = [3, '10-409后门', 2]
+
     db = my_sql("facerecognition")
+    print(db.boot_selftest())
 
     db.Create_Database()
     db.Create_table(tabname_info, column_info)
@@ -237,6 +196,11 @@ def reset():
     db.add_new_entry(tabname_entry, entry2)
     db.add_new_entry(tabname_entry, entry3)
 
+    db.Create_table(table_device, colunm_device)
+    db.add_new_entry(table_device, device1)
+    db.add_new_entry(table_device, device2)
+    db.add_new_entry(table_device, device3)
+
 
 def showlist(L):
     for i in L:
@@ -248,6 +212,11 @@ def showlist(L):
 if __name__ == "__main__":
     reset()
     # db=my_sql("facerecognition")
+    # db.boot_selftest()
+    # print(db.execute_sql("select * from info"))
+    # find=[["id","1"],["name","王旭刚"]]
+    # change=[["name","王旭刚"],["timee","18:00:00"]]
+    # db.update_table("entry",find,change)
 
     # print(db.get_newest_data("entry",2))
     # showlist(db.get_newest_data("entry",3))

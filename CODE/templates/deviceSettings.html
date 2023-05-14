@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>实验室打卡系统</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+        <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="/static/css/style.css" rel="stylesheet" />
+        <link href="/static/css/responsive.css" rel="stylesheet" />
+        <script src="/static/js/jquery-3.4.1.min.js"></script>
+        <script src="/static/js/bootstrap.js"></script>
+        <script src="/static/js/custom.js"></script>
+    </head>
+
+    <body class="sub_page">
+
+        <script type="text/javascript">
+            $(function(){  
+                $("#test li").click(function() {
+                    $(this).siblings('li').removeClass('li-selected');  
+                    $(this).addClass('li-selected'); 
+                    $(this).siblings('li').attr('name','');
+                    $(this).attr('name','li-selected');
+                });
+            }); 
+        </script>
+        <script>
+            function wholepage(){
+                $(window).attr("location","#s1");
+            }
+        </script>
+            
+    <div class="hero_area">
+        <header class="header_section">
+            <div class="container-fluid">
+                <nav class="navbar navbar-expand-lg custom_nav-container ">
+                    <a class="navbar-brand" href="/Home">
+                        <span>实验室打卡系统</span>
+                    </a>
+                </nav>
+            </div>
+        </header>
+    </div>
+
+
+    <section id="s0" class="catagory_section layout_padding3">
+        <div class="catagory_container">
+        <div class="container ">
+            <div class="row">
+            <div class="col-sm-6 col-md-9 ">
+                <div>
+                    <h5 id="idx">
+                    请选择设备：
+                    </h5>
+                    <div class="box1 ">
+                    <form method="post">
+                        <ul id="test">
+                    {%for j in range(0,10])%}
+                        <li name="" class="ori" value="{{j}}">
+                        {{j}}
+                        </li>
+                    {%endfor%}
+                        </ul>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="btn-box">
+            <a onclick="wholepage()">整卷阅览</a>
+            <div>&emsp;</div>
+            <a onclick="sub()">提交</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function subscribe() {
+        alert("Subscribe Success!");
+        }
+    </script>
+    
+
+    <script>
+        function sub(){
+
+        /*  0 -- 题目id
+            1 -- 题目text 
+            2 -- 选项文本 */
+
+            /*var arr0 = [];*/
+            var arr1 = [];
+            /*var arr2 = [];*/
+
+            $(".li-selected").each(function(){
+            var va1 = $(this).attr('value');
+            arr1.push(va1);
+            });
+
+            $.get('/submit', JSON.stringify({"titleID_choice":arr1}), function(data){
+            $(window).attr("location","/process");
+            },"text");
+        }
+        
+    </script>
+
+    </body>
+
+</html>

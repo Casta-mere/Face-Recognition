@@ -1,75 +1,65 @@
 import cv2
-import face_recognition
-import os
+import dlib
+import csv
+import pandas as pd
+import sys
 
-sourcedir = 'face/faceImg/source.jpg'
-dir = 'face/faceImg'
+sys.path.append(sys.path[0]+'/..')
+from Log import log as l
 
+source_pic_dir = 'face/faceImg/source.jpg'
+source_csv_dir = 'face/faceImg/features.csv'
+imgdir = 'face/faceImg'
+npydir = 'face/facenpy'
 
-def addface(userid):
-    # Initialize OpenCV video capture
-    video_capture = cv2.VideoCapture(0)
-    # video_capture = cv2.VideoCapture("rtsp://admin:a12345678@192.168.136.156:554/stream1")
+log = l.classlog("addface")
 
-    # Check if video capture is initialized
-    if(video_capture.isOpened()):
-        print("SUCCESS : Video capture initialized")
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor('face/data_dlib/shape_predictor_68_face_landmarks.dat')
+face_reco_model = dlib.face_recognition_model_v1("face/data_dlib/dlib_face_recognition_resnet_model_v1.dat")
+
+def get_features(frame):
+    faces = detector(frame, 1)
+    if len(faces) != 0:
+        shape = predictor(frame, faces[0])
+        face_descriptor = face_reco_model.compute_face_descriptor(frame, shape)
     else:
-        return False, "ERROR : Error initializing video capture"
-
-    # Take picture using video capture
-    ret, frame = video_capture.read()
-    target_size = (1080, 1080)
-    # resize frame
-    frame = cv2.resize(frame, target_size)
-    # improve face detection by converting to grayscale
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    face_locations = face_recognition.face_locations(frame)
-    # just get the face from the frame with a margin of 10 pixels
-    for (top, right, bottom, left) in face_locations:
-        frame = frame[top-10:bottom+10, left-10:right+10]
-
-    # If no faces are detected, return
-    if not face_locations:
-        return False, "ERROR : No face detected"
-
-    # Save the face encoding to a file in the faceImg directory
-    filename = f'{userid}.jpg'
-    filepath = os.path.join(dir, filename)
-    cv2.imwrite(filepath, frame)
-    return True, f"SUCCESS : New face added: userid:{userid}"
-
+        face_descriptor = 0
+    return face_descriptor
 
 def addface_frompic(userid):
 
-    frame = cv2.imread(sourcedir)
-    target_size = (1080, 1080)
-    # resize frame
-    # frame = cv2.resize(frame, target_size)
-    # improve face detection by converting to grayscale
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    face_locations = face_recognition.face_locations(frame)
-    # just get the face from the frame with a margin of 10 pixels
-    for (top, right, bottom, left) in face_locations:
-        frame = frame[top-10:bottom+10, left-10:right+10]
-
-    # If no faces are detected, return
-    if not face_locations:
-        return False, "ERROR : No face detected"
-
-    # Save the face encoding to a file in the faceImg directory
-    filename = f'{userid}.jpg'
-    filepath = os.path.join(dir, filename)
-    cv2.imwrite(filepath, frame)
-    return True, f"SUCCESS : New face added ! userid : {userid}"
-
+    frame=cv2.imread(source_pic_dir)
+    with open(source_csv_dir,"a+",newline='') as csvfile:
+        writer =csv.writer(csvfile)
+        features=get_features(frame)
+        if features==0:
+            msg="ERROR : No face detected"
+            log.log(msg)
+            return False,msg
+        else:
+            features_list=list(features)
+            features_list.insert(0,userid)
+            writer.writerow(features_list)
+    csvfile.close()
+    msg=f"SUCCESS : New face added ! userid : {userid}"
+    log.log(msg)
+    return True,msg
 
 def deleteface(userid):
-    filename = f'{userid}.jpg'
-    filepath = os.path.join(dir, filename)
-    os.remove(filepath)
-    return f"SUCCESS : Face removed: userid : {userid}"
+    msg="ALERT : Face file not found"
+    state=False
 
+    csv_rd = pd.read_csv(source_csv_dir, header=None)
+    for i in range(csv_rd.shape[0]):
+        if csv_rd.iloc[i][0] == userid:
+            csv_rd.drop(i, inplace=True)
+            csv_rd.to_csv(source_csv_dir, index=False, header=False)
+            msg = f"SUCCESS : Face file removed: userid : {userid}"
+            state = True
+            break
+
+    return state, msg
 
 if __name__ == "__main__":
-    print(addface_frompic(4))
+    pass
