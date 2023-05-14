@@ -9,7 +9,6 @@ function closeMedia() {
         })
 }   
 
-
 function getMedia() {
     let video = document.getElementById("video");
     let constraints = {
@@ -30,8 +29,6 @@ function takePhoto() {
     let ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, 400, 400);
 }
-
-
 
 function uploadImage(){
     var canvas = document.getElementById('canvas');
@@ -58,66 +55,66 @@ function uploadImage(){
     });
 }
 
-function turnBack() {
-    window.location.href = "/";
-}
-
 function sendBack(){
-    var name = document.getElementById("name").value
-    var email = document.getElementById("email").value
-    console.log(name)
-    console.log(email)
+    var name = document.getElementById("name").value;
+    var stuid = document.getElementById("stuid").value;
+    console.log(name);
+    console.log(stuid);
     var uploadAjax = $.ajax({
-        url:'/sendInfo',
-        type: 'get',
+        url:"/sendInfo",
+        type: "get",
         dataType: "text",
-        data: JSON.stringify({"name": name, "email": email}),
-        contentType:'json/application',
-        timeout:10000,
+        data: JSON.stringify({"name": name, "stuid": stuid}),
+        contentType:"json/application",
+        timeout:1500000,
         async: true,
         beforeSend: function () {
             $("#waitA").html("正在发送，请稍后...");
         },
         success: function (msg) {
             alert(msg)
-            window.location.href = "/";
-        },
+            window.location.href = "/adminPage";
+            },
         error: function(msg) {
             alert(msg)
+            $("#waitA").html("");
         },
         complete: function (XMLHttpRequest, textStatus) {
             if(textStatus == 'timeout'){
                 uploadAjax.abort(); 
                 alert("请求超时，请重试")
+                closeCard();
             }
         }
     });
 }
 
-//first page
-function getState(){
-    $.ajax({
-        url: "/getState",
-        type: "get",
-        timeout: 10000,
-        success: function(msg){
-          $('#rcg').html(msg)
-      },
-      });
-  }
-  setInterval(getState, 400)
-
 //manageInfo
 function turnToDel() {
-    var nData = document.getElementById('delName').value;
-    console.log(nData);
+    // 获取表格
+    var table = document.getElementsByTagName('table')[0];
+    console.log(table);
+
+    // 获取所有行
+    var rows = table.querySelectorAll('tr');
+    let nData = [];
+    
+    // 遍历每一行
+    for (var i = 0; i < rows.length-1; i++) {
+        // 获取该行所有单元格
+        var cells = rows[i+1].querySelectorAll('td');
+        // 处理单元格的值
+        var cellValueID = cells[1].textContent || cells[1].innerText;
+        nData.push(cellValueID);
+    }
+
     var uploadAjax = $.ajax({
       url:"/deleteInfo",
       type: "get",
       dataType: "text",
-      data: JSON.stringify({"delName": nData}),
+      data: JSON.stringify({"delInfo": nData}),
       contentType:"json/application",
-      timeout:10000,
+      timeout:1500000,
       async: true,
       beforeSend: function () {
         $('#waitDel').html("请稍后...")
@@ -126,8 +123,9 @@ function turnToDel() {
           alert(msg);
           window.location.href = "/adminPage";
       },
-      error: function(msg) {
+      error: function(data) {
           alert(msg);
+          $('#waitDel').html("")
       },
       complete: function (XMLHttpRequest, textStatus) {
           if(textStatus == 'timeout'){
@@ -135,10 +133,9 @@ function turnToDel() {
               alert("请求超时，请重试")
           }
       }
-  });
+    });
   }
 
 function turnBack() {
-    window.location.href = "/";
+    window.location.href = "/adminPage";
 }
-
