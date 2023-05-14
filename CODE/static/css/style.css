@@ -515,7 +515,27 @@ a:focus {
   top: 50%;
 }
 
+.catagory_section .btn-box1 a {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #44b89d;
+  color: #ffffff;
+  border-radius: 5px;
+  border: 1px solid #44b89d;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: bold;
+  position: relative;
+  top: 50%;
+}
+
 .catagory_section .btn-box a:hover {
+  background-color: transparent;
+  color: #44b89d;
+}
+
+.catagory_section .btn-box1 a:hover {
   background-color: transparent;
   color: #44b89d;
 }
