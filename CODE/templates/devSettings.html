@@ -16,39 +16,22 @@
     </head>
 
     <body class="sub_page">
-
-        <script type="text/javascript">
-            $(function(){  
-                $("#test li").click(function() {
-                    $(this).siblings('li').removeClass('li-selected');  
-                    $(this).addClass('li-selected'); 
-                    $(this).siblings('li').attr('name','');
-                    $(this).attr('name','li-selected');
-                });
-            }); 
-        </script>
-        <script>
-            function wholepage(){
-                $(window).attr("location","#s1");
-            }
-        </script>
             
-    <div class="hero_area">
-        <header class="header_section">
-            <div class="container-fluid">
-                <nav class="navbar navbar-expand-lg custom_nav-container ">
-                    <a class="navbar-brand" href="/Home">
-                        <span>实验室打卡系统</span>
-                    </a>
-                </nav>
-            </div>
-        </header>
-    </div>
+        <div class="hero_area">
+            <header class="header_section">
+                <div class="container-fluid">
+                    <nav class="navbar navbar-expand-lg custom_nav-container ">
+                        <a class="navbar-brand" href="/Home">
+                            <span>实验室打卡系统</span>
+                        </a>
+                    </nav>
+                </div>
+            </header>
+        </div>
 
-
-    <section id="s0" class="catagory_section layout_padding3">
-        <div class="catagory_container">
-            <div class="container ">
+        {%if create == 0%}
+        <section class="catagory_section layout_padding3">
+            <div class="container">
                 <div class="row">
                     <div class="col-sm-6 col-md-12 ">
                         <h5 id="idx">请选择设备：</h5>
@@ -58,6 +41,7 @@
                                     <thead class="thead-dark">
                                         <tr>
                                             <th scope="col">设备ID</th>
+                                            <th scope="col">设备名称</th>
                                             <th scope="col">设备类型</th>
                                             <th scope="col">启用</th>
                                         </tr>
@@ -65,11 +49,13 @@
                                     <tbody>
                                         {% for i in range(0,10)%}
                                         <tr>
-                                            <td class="col-4" scope="col">000001</td>
-                                            <td class="col-4" scope="col">签到</td>
-                                            <td class="col-4" scope="col">
+                                            <td class="col-3" scope="col">000001</td>
+                                            <td class="col-3" scope="col">323前门</td>
+                                            <td class="col-3" scope="col">签到</td>
+                                            <td class="col-3" scope="col">
                                                 <div class="btn-box1">
-                                                    <a onclick=>启用</a>
+                                                    <!--之后把i+1换成设备的ID-->
+                                                    <a value={{i+1}} onclick="startDevChoose(this)">启用</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -77,44 +63,57 @@
                                     </tbody>
                                 </table>
                             </form>
-                            
+                        </div>             
+                    </div>
+                    <div class="col-md-4 offset-4">
+                        <div class="btn-box">
+                            <button onclick="turnBackInit()">返回</button>
                         </div>
-                        
                     </div>
                 </div>
+            </div> 
+        </section>
+        {%else%}
+        <section class="contact_section layout_padding">
+            <div class="container ">
+                <div class="row">
+                    <div class="col-sm-6 col-md-12 ">
+                        <h4 id="idx">请填写设备信息：</h4>
+                        <br>           
+                    </div>
+                </div>
+                <div clas="row">
+                    <div class="col-12">
+                        <div id="newDev0" name="newDev">
+                            <input type="text" id="newDev" name="newDev" placeholder="请输入设备名称">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div id="type" name="type">
+                            <select id="type-select" class="form-control" name="type">
+                                <option value=0>请选择设备类型</option>
+                                <option value=1>仅签到</option>
+                                <option value=2>仅签退</option>
+                                <option value=3>签到和签退</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 offset-3">
+                        <div class="btn-box">
+                            <button onclick="startDevNew()"> 确认</button>
+                            &emsp;&emsp;
+                            <button onclick="turnBackInit()">返回</button>
+                        </div>
+                    </div>
+                    <br>
+                    <br>    
+                    <div id="detailed-info" style="text-align:center;"></div>
+                </div>
             </div>
-        </div> 
-    </section>
+        </section>
+        {%endif%}
 
-    <script>
-        function subscribe() {
-        alert("Subscribe Success!");
-        }
-    </script>
-    
-
-    <script>
-        function sub(){
-
-        /*  0 -- 题目id
-            1 -- 题目text 
-            2 -- 选项文本 */
-
-            /*var arr0 = [];*/
-            var arr1 = [];
-            /*var arr2 = [];*/
-
-            $(".li-selected").each(function(){
-            var va1 = $(this).attr('value');
-            arr1.push(va1);
-            });
-
-            $.get('/submit', JSON.stringify({"titleID_choice":arr1}), function(data){
-            $(window).attr("location","/process");
-            },"text");
-        }
-        
-    </script>
+        <script>infoCard();</script>
 
     </body>
 

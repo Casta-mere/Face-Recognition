@@ -14,7 +14,25 @@ while (true) {
 }
 
 let ip=Server.ip
-let socket = new WebSocket(ip);
+
+// 定义函数用于连接 socket
+function connect() {
+  let socket = new WebSocket(ip);
+  // 监听连接成功事件
+  socket.onopen = function() {
+    console.log('Socket已连接');
+  };
+  // 监听连接失败事件
+  socket.onerror = function() {
+    console.log('连接失败，3秒后重试');
+    setTimeout(function() {
+      connect(); // 延迟3秒后再次尝试连接
+    }, 3000);
+  };
+}
+
+// 调用连接函数
+connect();
 
 //shake hands with server :send hello
 socket.onopen = function (event) {

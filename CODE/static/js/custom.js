@@ -134,8 +134,85 @@ function turnToDel() {
           }
       }
     });
-  }
+}
+
+function startDevChoose(ele){
+    const value = ele.getAttribute('value');
+    console.log(value);
+    var uploadAjax = $.ajax({
+        url:"/startDev",
+        type: "get",
+        dataType: "text",
+        headers: { 'from': '/chooseDev' },
+        data: JSON.stringify({"chooseDev": value}),
+        contentType:"json/application",
+        timeout:1500000,
+        async: true,
+        success: function (msg) {
+            alert(msg);
+            window.location.href = "/Home";
+        }
+        ,
+        error: function(msg) {
+            alert(msg);
+        }
+        ,
+        complete: function (XMLHttpRequest, textStatus) {
+            if(textStatus == 'timeout'){
+                uploadAjax.abort(); 
+                alert("请求超时，请重试")
+            }
+        }
+    });
+}
+
+function startDevNew(){
+    var devName = document.getElementById('newDev').value;
+    var devType = document.getElementById('type-select').value;
+    console.log(devName);
+    console.log(devType);
+    var uploadAjax = $.ajax({
+        url:"/startDev",
+        type: "get",
+        dataType: "text",
+        headers: { 'from': '/newDev' },
+        data: JSON.stringify({"newDev": [devName, devType]}),
+        contentType:"json/application",
+        timeout:1500000,
+        async: true,
+        success: function (msg) {
+            alert(msg);
+            window.location.href = "/Home";
+        }
+        ,
+        error: function(msg) {
+            alert(msg);
+        }
+        ,
+        complete: function (XMLHttpRequest, textStatus) {
+            if(textStatus == 'timeout'){
+                uploadAjax.abort(); 
+                alert("请求超时，请重试")
+            }
+        }
+    });
+}
 
 function turnBack() {
     window.location.href = "/adminPage";
+}
+
+function turnBackInit() {
+    window.location.href = "/settings";
+}
+
+function infoCard(){
+    var detailedInfo = ["这是仅签到的详细信息","这是仅签退的详细信息","这是签到和签退的详细信息"];
+    var typeSelect = document.getElementById("type-select");
+    var detailedInfoElement = document.getElementById("detailed-info");
+
+    typeSelect.addEventListener("change", function() {
+        var selectedValue = typeSelect.options[typeSelect.selectedIndex].value;
+        detailedInfoElement.innerHTML = detailedInfo[parseInt(selectedValue)-1];
+    });
 }
