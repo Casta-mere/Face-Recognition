@@ -116,7 +116,12 @@ def sendInfo():
 def manageInfo():
     if session['loginState']==0:
         abort(403)
-    return render_template('manageInfo.html')
+    # 列举所有学生信息
+    stuInfo = [['2020329621074','王旭刚'],['2020329621199','韦杨婧'],['2020329621229','刘俊伟']]
+    return render_template(
+        'manageInfo.html',
+        stuInfo = stuInfo
+        )
 
 # 显示信息
 @app.route('/deleteInfo',methods=['GET','POST'])
@@ -125,10 +130,9 @@ def deleteInfo():
         abort(403)
     name=list(request.args.to_dict().keys())[0]
     name=json.loads(name)
-    name=name['delName']
-    # print(name)
-    con,msg=ctrl.deleteuser(name)
-    print(msg)
+    name=name['delInfo']
+    # con,msg=ctrl.deleteuser(name)
+    msg="here"
     return msg
 
 # 登录界面

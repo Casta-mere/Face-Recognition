@@ -73,7 +73,6 @@ function sendBack(){
         },
         success: function (msg) {
             alert(msg)
-            alert(window.location.href);
             window.location.href = "/adminPage";
             },
         error: function(msg) {
@@ -92,13 +91,28 @@ function sendBack(){
 
 //manageInfo
 function turnToDel() {
-    var nData = document.getElementById('delName').value;
-    console.log(nData);
+    // 获取表格
+    var table = document.getElementsByTagName('table')[0];
+    console.log(table);
+
+    // 获取所有行
+    var rows = table.querySelectorAll('tr');
+    let nData = [];
+    
+    // 遍历每一行
+    for (var i = 0; i < rows.length-1; i++) {
+        // 获取该行所有单元格
+        var cells = rows[i+1].querySelectorAll('td');
+        // 处理单元格的值
+        var cellValueID = cells[1].textContent || cells[1].innerText;
+        nData.push(cellValueID);
+    }
+
     var uploadAjax = $.ajax({
       url:"/deleteInfo",
       type: "get",
       dataType: "text",
-      data: JSON.stringify({"delName": nData}),
+      data: JSON.stringify({"delInfo": nData}),
       contentType:"json/application",
       timeout:1500000,
       async: true,
@@ -107,7 +121,6 @@ function turnToDel() {
       },
       success: function (msg) {
           alert(msg);
-          alert(window.location.href);
           window.location.href = "/adminPage";
       },
       error: function(data) {
