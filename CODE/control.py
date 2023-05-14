@@ -110,7 +110,7 @@ class control():
         self.info = {}
         l = list(self.database.get_all_data('info'))
         for i in l:
-            self.info[i[0]] = [i[1], i[2]]
+            self.info[eval(i[0])] = [i[1], i[2]]
 
     def now_time(self):
         nowdate = time.strftime('%Y-%m-%d', time.localtime())
@@ -194,7 +194,7 @@ class control():
                 return False, "未检测到人脸，请站远一点再重试"
 
             self.log.log(msg+f", username : {name}")
-            info = [userid, name, email]
+            info = [str(userid), name, email]
             self.database.add_new_entry('info', info)
             self.load_info()
             self.initial_user(userid)
@@ -278,8 +278,14 @@ class control():
                     # print(f"ERROR : {dictionary[i]} not exist")
             
             self.flagLoad = False
-            print("load faces cost : "+str(time.time()-t))
-            print(f"total {len(self.known_face_names)} faces loaded")
+
+            msg = "SUCCESS : load faces cost : "+str(time.time()-t)
+            self.obj.log.log(msg)
+            print(msg)
+
+            msg = f"SUCCESS : total {len(self.known_face_names)} faces loaded"
+            self.obj.log.log(msg)
+            print(msg)
 
         def update_faces_add(self,dictionary):
             self.flagLoad = True
@@ -301,7 +307,6 @@ class control():
                 if (username == i):
                     self.features_known_list.pop(self.known_face_names.index(i))
                     self.known_face_names.remove(i)
-                    print("remove "+i+" from known_face_names")
                     break
             
             self.flagLoad = False
@@ -368,21 +373,21 @@ class control():
                 else:
                     shape = predictor(frame, faces[0])
                     current_face_feature = face_reco_model.compute_face_descriptor(frame, shape)
-                    current_face_X_e_distance_list = []
+                    current_face_distance = []
 
                     for i in range(len(self.features_known_list)):
                         e_distance_tmp = self.return_euclidean_distance(current_face_feature, self.features_known_list[i])
-                        current_face_X_e_distance_list.append(e_distance_tmp)
+                        current_face_distance.append(e_distance_tmp)
 
-                    similar_person_num = np.argmin(current_face_X_e_distance_list)
+                    similar_person_num = np.argmin(current_face_distance)
 
-                    if current_face_X_e_distance_list[similar_person_num] < 0.4:
+                    if current_face_distance[similar_person_num] < 0.4:
                         name = self.known_face_names[similar_person_num]
-                        confidence = 1 - current_face_X_e_distance_list[similar_person_num]
+                        confidence = 1 - current_face_distance[similar_person_num]
                         self.response(True, name, confidence)
                         self.obj.check(self.obj.get_id(name),id)
                     else:
-                        self.response(True, "unknown", current_face_X_e_distance_list[similar_person_num])
+                        self.response(True, "unknown", current_face_distance[similar_person_num])
                         self.obj.clientDict[id].msg = ""
 
                 self.image_processed(id)
@@ -443,12 +448,6 @@ class control():
             async def serverRecv(self, websocket):
                 while True:
                     
-                    # add timeout to del the client
-                    # try:
-                    #     recv_text = await asyncio.wait_for(websocket.recv(), timeout=200)
-                    # except:
-                    #     print(f"ERROR : TIMEOUT {self.IP_PORT}")
-                    #     break
                     recv_text = await websocket.recv()
                     if "data:image/jpeg;base64," in recv_text:
                         recv_text = recv_text.replace(
@@ -460,9 +459,6 @@ class control():
                         if(self.obj.is_image_in_queue(self.id)):
                             self.obj.update_image_in_queue(self.id,image)
 
-                        # print(image.shape)
-                        # cv2.imshow("server", image)
-                        # cv2.waitKey(1)
 
             # handshake with client
             async def serverRun(self, websocket):
