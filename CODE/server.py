@@ -40,8 +40,8 @@ def hello_world():
     # t.start()
     # app.app_context().push()
 
-    return redirect(url_for('home'))
-    # return redirect(url_for('settings'))
+    # return redirect(url_for('home'))
+    return redirect(url_for('settings'))
 
 # 选择设备
 @app.route('/settings',methods=['GET','POST'])
@@ -50,14 +50,38 @@ def settings():
 
 @app.route('/chooseDev',methods=['GET','POST'])
 def chooseDevice():
-    return render_template('devSettings.html')
+    return render_template(
+        'devSettings.html',
+        who="chooseDev",
+        create=0
+        )
+
+@app.route('/newDev',methods=['GET','POST'])
+def newDevice():
+    return render_template(
+        'devSettings.html',
+        who="newDev",
+        create=1
+        )
+
+@app.route('/startDev',methods=['GET','POST'])
+def startDev():
+    page_url = request.headers.get('from')
+    data=list(request.args.to_dict().keys())[0]
+    data=json.loads(data)
+    if page_url=="chooseDev":
+        data=data['chooseDev']
+    elif page_url=="newDev":
+        data=data['newDev']
+    print(data)
+    msg="here"
+    return msg
 
 # 首页
 @app.route('/Home',methods=['GET','POST'])
 def home():
     try:
         ipContent="wss://"+session['ip']+":"+session['port']
-        print(session['loginState'])
         return render_template(
             'firstPage.html',
             state=session['loginState'],
