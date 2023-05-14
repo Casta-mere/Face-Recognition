@@ -1,11 +1,37 @@
 import cv2
 import face_recognition
 import os
+import dlib
+import csv
 import numpy as np
+import time
+import sys
 
-sourcedir = 'face/faceImg/source.jpg'
+sys.path.append(sys.path[0]+'/..')
+from Log import log as l
+
+source_pic_dir = 'face/faceImg/source.jpg'
+source_csv_dir = 'face/faceImg/features.csv'
 imgdir = 'face/faceImg'
 npydir = 'face/facenpy'
+
+log = l.classlog("addface")
+
+# t1=time.time()
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor('face/data_dlib/shape_predictor_68_face_landmarks.dat')
+face_reco_model = dlib.face_recognition_model_v1("face/data_dlib/dlib_face_recognition_resnet_model_v1.dat")
+# print(f"load model time : {time.time()-t1}")
+
+
+def get_features(frame):
+    faces = detector(frame, 1)
+    if len(faces) != 0:
+        shape = predictor(frame, faces[0])
+        face_descriptor = face_reco_model.compute_face_descriptor(frame, shape)
+    else:
+        face_descriptor = 0
+    return face_descriptor
 
 
 def addface(userid):
@@ -48,31 +74,23 @@ def addface(userid):
 
 def addface_frompic(userid):
 
-    frame = cv2.imread(sourcedir)
-    face_locations = face_recognition.face_locations(frame)
-
-    # just get the face from the frame with a margin of 10 pixels
-    for (top, right, bottom, left) in face_locations:
-        frame = frame[top-10:bottom+10, left-10:right+10]
-
-    # If no faces are detected, return
-    if not face_locations:
-        return False, "ERROR : No face detected"
-    if len(face_locations) > 1:
-        return False, "ERROR : More than one face detected"
-
-    # Save numpy array
-    filename = f'{userid}.npy'
-    filepath = (f"{npydir}/{filename}")
-    face_encoding = face_recognition.face_encodings(frame)[0]
-    np.save(filepath, face_encoding)
-
-    # Save face image
-    filename = f'{userid}.jpg'
-    filepath = os.path.join(imgdir, filename)
-    cv2.imwrite(filepath, frame)
-    return True, f"SUCCESS : New face added ! userid : {userid}"
-
+    frame=cv2.imread(source_pic_dir)
+    with open(source_csv_dir,"a+",newline='') as csvfile:
+        writer =csv.writer(csvfile)
+        features=get_features(frame)
+        if features==0:
+            msg="ERROR : No face detected"
+            log.log(msg)
+            return False,msg
+        else:
+            features_list=list(features)
+            features_list.insert(0,userid)
+            writer.writerow(features_list)
+    csvfile.close()
+    msg=f"SUCCESS : New face added ! userid : {userid}"
+    log.log(msg)
+    return True,msg
+            
 
 def deleteface(userid):
     msg = ""
@@ -105,4 +123,4 @@ def deleteface(userid):
 
 
 if __name__ == "__main__":
-    print()
+    pass
