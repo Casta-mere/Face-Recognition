@@ -364,7 +364,7 @@ class control():
                 face_cnt = len (faces)
 
                 if face_cnt != 1:
-                    pass
+                    self.obj.clientDict[id].msg = ""
                 else:
                     shape = predictor(frame, faces[0])
                     current_face_feature = face_reco_model.compute_face_descriptor(frame, shape)
@@ -384,29 +384,6 @@ class control():
                     else:
                         self.response(True, "unknown", current_face_X_e_distance_list[similar_person_num])
                         self.obj.clientDict[id].msg = ""
-
-                # face_locations = face_recognition.face_locations(frame)
-                # face_encodings = face_recognition.face_encodings(
-                #     frame, face_locations)
-                # if len(face_locations) == 0:
-                #     self.response(False)
-                # else:
-                #     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                #         matches = face_recognition.compare_faces(
-                #             self.known_face_encodings, face_encoding)
-                #         name = "Unknown"
-                #         face_distances = face_recognition.face_distance(
-                #             self.known_face_encodings, face_encoding)
-                #         best_match_index = np.argmin(face_distances)
-                #         confidence = 1 - face_distances[best_match_index]
-                #         if matches[best_match_index] and confidence > 0.6:
-                #             name = self.known_face_names[best_match_index]
-                #             self.response(True, name, confidence)
-                #             self.obj.check(self.obj.get_id(name),id)
-                #             # print(self.obj.check(self.obj.get_id(name)))
-                #         else:
-                #             self.response(True, "unknown", confidence)
-                #             self.obj.clientDict[id].msg = ""
 
                 self.image_processed(id)
 
