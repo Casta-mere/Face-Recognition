@@ -48,33 +48,42 @@
 
     <section id="s0" class="catagory_section layout_padding3">
         <div class="catagory_container">
-        <div class="container ">
-            <div class="row">
-            <div class="col-sm-6 col-md-9 ">
-                <div>
-                    <h5 id="idx">
-                    请选择设备：
-                    </h5>
-                    <div class="box1 ">
-                    <form method="post">
-                        <ul id="test">
-                    {%for j in range(0,10])%}
-                        <li name="" class="ori" value="{{j}}">
-                        {{j}}
-                        </li>
-                    {%endfor%}
-                        </ul>
-                    </form>
+            <div class="container ">
+                <div class="row">
+                    <div class="col-sm-6 col-md-12 ">
+                        <h5 id="idx">请选择设备：</h5>
+                        <div class="box1 ">
+                            <form method="post">
+                                <table class="table table-hover" style="text-align:center;">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">设备ID</th>
+                                            <th scope="col">设备类型</th>
+                                            <th scope="col">启用</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for i in range(0,10)%}
+                                        <tr>
+                                            <td class="col-4" scope="col">000001</td>
+                                            <td class="col-4" scope="col">签到</td>
+                                            <td class="col-4" scope="col">
+                                                <div class="btn-box1">
+                                                    <a onclick=>启用</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {%endfor%}
+                                    </tbody>
+                                </table>
+                            </form>
+                            
+                        </div>
+                        
                     </div>
                 </div>
             </div>
-            </div>
-            <div class="btn-box">
-            <a onclick="wholepage()">整卷阅览</a>
-            <div>&emsp;</div>
-            <a onclick="sub()">提交</a>
-            </div>
-        </div>
+        </div> 
     </section>
 
     <script>

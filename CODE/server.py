@@ -50,7 +50,7 @@ def settings():
 
 @app.route('/chooseDev',methods=['GET','POST'])
 def chooseDevice():
-    return render_template('deviceSettings.html')
+    return render_template('devSettings.html')
 
 # 首页
 @app.route('/Home',methods=['GET','POST'])
@@ -105,7 +105,7 @@ def sendInfo():
     data=json.loads(data)
     # print(data)
     name=data['name']
-    email=data['email']
+    email=data['stuid']
     con,msg=ctrl.adduser(name,email)
     print(msg)
     return msg

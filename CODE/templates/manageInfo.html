@@ -57,51 +57,6 @@
       </div>
     </section>
 
-    <script>
-      function subscribe() {
-        alert("Subscribe Success!");
-      }
-    </script>
-    <script>
-      function turnBack() {
-        window.location.href = "/Home";
-      }
-    </script>
-    <script>
-      
-    </script>
-    <script>
-      function turnToDel() {
-        var nData = document.getElementById('delName').value;
-        console.log(nData);
-        var uploadAjax = $.ajax({
-          url:"/deleteInfo",
-          type: "get",
-          dataType: "text",
-          data: JSON.stringify({"delName": nData}),
-          contentType:"json/application",
-          timeout:1500000,
-          async: true,
-          beforeSend: function () {
-            $('#waitDel').html("请稍后...")
-          },
-          success: function (msg) {
-              alert(msg);
-              window.location.href = "/adminPage";
-          },
-          error: function(data) {
-              alert(msg);
-              $('#waitDel').html("")
-          },
-          complete: function (XMLHttpRequest, textStatus) {
-              if(textStatus == 'timeout'){
-                  uploadAjax.abort(); 
-                  alert("请求超时，请重试")
-              }
-          }
-      });
-      }
-    </script>
     <script src="static/js/jquery-3.4.1.min.js"></script>
     <script src="static/js/bootstrap.js"></script>
     <script src="static/js/custom.js"></script>

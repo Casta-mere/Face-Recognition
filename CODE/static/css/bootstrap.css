@@ -161,7 +161,7 @@ li {
   border-color: #D5DBDB;
   margin: 8px;
   Border-radius: 4px; 
-  padding: 4px;
+  padding: 20px;
   color: #000;
 }
 
@@ -180,7 +180,7 @@ li {
   box-shadow: 0 0 0 0.2rem #063547;
   margin: 8px;
   Border-radius: 4px;
-  padding: 4px;
+  padding: 20px;
 }
 /*可以把前面的.li-ori的transparent覆盖*/
 .li-selected:hover {
@@ -296,6 +296,12 @@ svg {
 
 table {
   border-collapse: collapse;
+}
+
+table td{
+  text-align: center;  /*设置文字水平居中*/
+  height: 60px;
+  vertical-align: middle!important;  /*设置文字垂直居中*/
 }
 
 caption {

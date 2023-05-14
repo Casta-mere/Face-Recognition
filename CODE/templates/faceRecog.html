@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -11,7 +12,18 @@
         <link href="static/css/responsive.css" rel="stylesheet" />
     </head>
 
-    <body>
+    <body class="sub_page">
+
+        <header class="header_section">
+            <div class="container-fluid">
+              <nav class="navbar navbar-expand-lg custom_nav-container ">
+                <a class="navbar-brand" href="/Home">
+                  <span>实验室打卡系统</span>
+                </a>
+              </nav>
+            </div>
+        </header>
+
         <section class="contact_section layout_padding">
             <div class="container">
                 <div class="row">
@@ -61,8 +73,8 @@
                         <div id="name0" name="name">
                             <input id="name" name="name" value="{{name}}" type="text" placeholder="姓名" />
                         </div>
-                        <div id="email0" name="email">
-                            <input id="email" name="email" value="{{email}}" type="email" placeholder="邮箱" />
+                        <div id="stuid0" name="stuid">
+                            <input id="stuid" name="stuid" value="{{email}}" type="text" placeholder="学号" />
                         </div>
                         <div class="btn-box">
                             <a onclick="sendBack()">
@@ -78,109 +90,12 @@
             </div>
         </section>
         <script>
-            function closeMedia() {
-                var video = document.getElementById('video');
-                if (!video.srcObject) return
-                let stream = video.srcObject
-                let tracks = stream.getTracks();
-                tracks.forEach(track => {
-                    track.stop()
-                })
-        }   
-        
-        let video = document.getElementById("video");
-        function getMedia() {
-            let constraints = {
-                video: {width: 400, height: 400},
-                audio: false
-            };
-            let promise = navigator.mediaDevices.getUserMedia(constraints);
-            promise.then(function (MediaStream) {
-                video.srcObject = MediaStream;
-                video.play();
-            }).catch(function (PermissionDeniedError) {
-                console.log(PermissionDeniedError);
-            })
-        }
-        
-
-        
-        function takePhoto() {
-            let canvas = document.getElementById("canvas");
-            let ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, 400, 400);
-        }
-        
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        function uploadImage(){
-            canvas.width = 400;
-            canvas.height = 400;
-            context.drawImage(video, 0, 0, 400, 400);
-            var imgData = canvas.toDataURL("image/jpg");
-            imgData = imgData.replace(/^data:image\/(png|jpg);base64,/,"")
-            var uploadAjax = $.ajax({
-                type: "post",
-                url:"/receiveImage",
-                data: JSON.stringify({"imgData": imgData}),
-                contentType:"json/application",
-                timeout:10000,
-                async: true,
-                complete: function (XMLHttpRequest, textStatus) {
-                    if(textStatus == 'timeout'){
-                        uploadAjax.abort(); 
-                        alert("请求超时，请重试")
-                        closeCard();
-                    }
-                }
-            });
-        }
-        
-        function turnBack() {
-            window.location.href = "/adminPage";
-        }
-        
-        function sendBack(){
-            var name = document.getElementById("name").value
-            var email = document.getElementById("email").value
-            console.log(name)
-            console.log(email)
-            var uploadAjax = $.ajax({
-                url:'/sendInfo',
-                type: 'get',
-                dataType: "text",
-                data: JSON.stringify({"name": name, "email": email}),
-                contentType:'json/application',
-                timeout:1500000,
-                async: true,
-                beforeSend: function () {
-                    $("#waitA").html("正在发送，请稍后...");
-                },
-                success: function (msg) {
-                    alert(msg)
-//                    if (msg.indexOf("添加成功") != -1) {
-                    window.location.href = "/adminPage";
-//                    }else{
-                        //console.log(typeof msg)
-//                        $("#waitA").html("");
-                    }
-                },
-                error: function(msg) {
-                    alert(msg)
-                    $("#waitA").html("");
-                },
-                complete: function (XMLHttpRequest, textStatus) {
-                    if(textStatus == 'timeout'){
-                        uploadAjax.abort(); 
-                        alert("请求超时，请重试")
-                        closeCard();
-                    }
-                }
-            });
-        }
+            
         </script>
         <script src='static/js/camera.js'></script>
         <script src='static/js/jquery-1.7.1.min.js'></script>
         <script src="static/js/custom.js"></script>
     </body>
 </html>
+
+
