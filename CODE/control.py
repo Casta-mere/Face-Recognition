@@ -211,29 +211,27 @@ class control():
             self.log.log(msg)
             return False, msg
 
-    def deleteuser(self, username):
-        try:
-            userid = self.get_id(username)
-        except:
-            msg = f"ERROR : user {username} not exist!"
+    def deleteuser(self, userid_list):
+        message = "SUCCESS : 删除成功"
+        flag = False
+        for userid in userid_list:
+            username=self.info[eval(userid)][0]
+
+            self.database.delete_table_entry('info', userid)
+            self.database.delete_table_entry('entry', userid)
+            state, msg = addface.deleteface(eval(userid))
+            
             self.log.log(msg)
-            msg = f"用户{username}不存在"
-            return False, msg
 
-        self.database.delete_table_entry('info', userid)
-        self.database.delete_table_entry('entry', userid)
-        state, msg = addface.deleteface(userid)
-        
-        self.log.log(msg)
+            self.load_info()
+            self.renew_status()
+            self.recognition.update_faces_delete(username)
 
-        self.load_info()
-        self.renew_status()
-        self.recognition.update_faces_delete(username)
+            msg = f"SUCCESS : user {username} (usrid {userid}) deleted!"
+            self.log.log(msg)
+            print(msg)
 
-        msg = f"SUCCESS : user {username} (usrid {userid}) deleted!"
-        self.log.log(msg)
-        msg = f"SUCCESS : 用户{username}删除成功"
-        return True, msg
+        return True, message
 
     class recognize():
 
