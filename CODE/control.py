@@ -39,6 +39,7 @@ class control():
         # self.mail=mail()
         self.info = {}
         self.user_status = {}
+        self.devices = {}
 
         self.load_info()
         self.renew_status()
@@ -85,6 +86,9 @@ class control():
         
         return self.IP_PORT,client
         
+    def set_client_type(self,PORT,Type):
+        self.clientDict[PORT].Type=Type
+
     def del_client(self,PORT):
         self.recognition.del_client(PORT)
         del self.clientDict[PORT]
@@ -112,6 +116,23 @@ class control():
         for i in l:
             self.info[eval(i[0])] = [i[1], i[2]]
 
+    def get_users(self):
+        info = []
+        for i in self.info.keys():
+            info.append([i, self.info[i][0]])
+        print(info)
+        return info
+
+    def load_devices(self):
+        self.devices = {}
+        l = list(self.database.get_all_data('device'))
+        for i in l:
+            self.devices[i[0]] = [i[1], i[2]]
+    
+    def get_devices(self):
+        print(self.devices)
+        return self.devices
+    
     def now_time(self):
         nowdate = time.strftime('%Y-%m-%d', time.localtime())
         nowtime = time.strftime('%H:%M:%S', time.localtime())
@@ -163,20 +184,44 @@ class control():
         valid = self.is_valid(userid)
         status = self.user_status[userid][0]
         client = self.clientDict[id]
+        tpye = client.get_type()
         client.msg = ""
 
-        if(not valid and status):
-            client.msg = f"{self.info[userid][0]}请勿重复签到"
-        elif(not valid and not status):
-            client.msg = f"{self.info[userid][0]}请勿重复签退"
-        elif(valid and status):
-            self.getout(userid)
-            client.msg = f"{self.info[userid][0]}签退成功"
-            time.sleep(3)
-        elif(valid and not status):
-            self.getin(userid)
-            client.msg = f"{self.info[userid][0]}签到成功"
-            time.sleep(3)
+        switch = {1: "签到签退", 2: "签到", 3: "签退"}
+
+        if tpye == 1:
+            if(not valid and status):
+                client.msg = f"{self.info[userid][0]}请勿重复签到"
+            elif(not valid and not status):
+                client.msg = f"{self.info[userid][0]}请勿重复签退"
+            elif(valid and status):
+                self.getout(userid)
+                client.msg = f"{self.info[userid][0]}签退成功"
+                time.sleep(3)
+            elif(valid and not status):
+                self.getin(userid)
+                client.msg = f"{self.info[userid][0]}签到成功"
+                time.sleep(3)
+
+        elif tpye == 2:
+            if(not valid and status):
+                client.msg = f"{self.info[userid][0]}请勿重复签到"
+            elif(valid and not status):
+                self.getin(userid)
+                client.msg = f"{self.info[userid][0]}签到成功"
+                time.sleep(3)
+            else:
+                client.msg = f"该设备只能进行{switch[tpye]}操作"
+
+        elif tpye == 3:
+            if(not valid and not status):
+                client.msg = f"{self.info[userid][0]}请勿重复签退"
+            elif(valid and status):
+                self.getout(userid)
+                client.msg = f"{self.info[userid][0]}签退成功"
+                time.sleep(3)
+            else:
+                client.msg = f"该设备只能进行{switch[tpye]}操作"
         return client.msg
 
     def adduser(self, name, email):
@@ -211,29 +256,27 @@ class control():
             self.log.log(msg)
             return False, msg
 
-    def deleteuser(self, username):
-        try:
-            userid = self.get_id(username)
-        except:
-            msg = f"ERROR : user {username} not exist!"
+    def deleteuser(self, userid_list):
+        message = "SUCCESS : 删除成功"
+        flag = False
+        for userid in userid_list:
+            username=self.info[eval(userid)][0]
+
+            self.database.delete_table_entry('info', userid)
+            self.database.delete_table_entry('entry', userid)
+            state, msg = addface.deleteface(eval(userid))
+            
             self.log.log(msg)
-            msg = f"用户{username}不存在"
-            return False, msg
 
-        self.database.delete_table_entry('info', userid)
-        self.database.delete_table_entry('entry', userid)
-        state, msg = addface.deleteface(userid)
-        
-        self.log.log(msg)
+            self.load_info()
+            self.renew_status()
+            self.recognition.update_faces_delete(username)
 
-        self.load_info()
-        self.renew_status()
-        self.recognition.update_faces_delete(username)
+            msg = f"SUCCESS : user {username} (usrid {userid}) deleted!"
+            self.log.log(msg)
+            print(msg)
 
-        msg = f"SUCCESS : user {username} (usrid {userid}) deleted!"
-        self.log.log(msg)
-        msg = f"SUCCESS : 用户{username}删除成功"
-        return True, msg
+        return True, message
 
     class recognize():
 
@@ -413,6 +456,9 @@ class control():
                 self.Type = Type
                 self.id = id
                 self.msg=""
+
+            def get_type(self):
+                return self.Type
 
             def get_msg(self):
                 return self.msg

@@ -47,7 +47,7 @@ def addface_frompic(userid):
     return True,msg
 
 def deleteface(userid):
-    msg="ALERT : Face file not found"
+    msg=f"ALERT : Face file for {userid} not found"
     state=False
 
     csv_rd = pd.read_csv(source_csv_dir, header=None)
@@ -58,7 +58,7 @@ def deleteface(userid):
             msg = f"SUCCESS : Face file removed: userid : {userid}"
             state = True
             break
-
+    log.log(msg)
     return state, msg
 
 if __name__ == "__main__":
