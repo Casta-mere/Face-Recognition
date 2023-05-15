@@ -39,6 +39,7 @@ class control():
         # self.mail=mail()
         self.info = {}
         self.user_status = {}
+        self.devices = {}
 
         self.load_info()
         self.renew_status()
@@ -115,6 +116,23 @@ class control():
         for i in l:
             self.info[eval(i[0])] = [i[1], i[2]]
 
+    def get_users(self):
+        info = []
+        for i in self.info.keys():
+            info.append([i, self.info[i][0]])
+        print(info)
+        return info
+
+    def load_devices(self):
+        self.devices = {}
+        l = list(self.database.get_all_data('device'))
+        for i in l:
+            self.devices[i[0]] = [i[1], i[2]]
+    
+    def get_devices(self):
+        print(self.devices)
+        return self.devices
+    
     def now_time(self):
         nowdate = time.strftime('%Y-%m-%d', time.localtime())
         nowtime = time.strftime('%H:%M:%S', time.localtime())
