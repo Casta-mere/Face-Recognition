@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>实验室打卡系统</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/static/css/style.css" rel="stylesheet" />
+    <link href="/static/css/responsive.css" rel="stylesheet" />
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+  </head>
+
+
+  <body>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="输入搜索内容">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <button type="button" id="searchBtn" class="btn btn-primary pull-right">搜索</button>
+            </div>
+        </div>
+        <div class="col-md-12">
+        <ul class="list-group" id="listGroup">
+            <li class="list-group-item">列表项1</li>
+            <li class="list-group-item">列表项2</li>
+            <li class="list-group-item">列表项3</li>
+            <li class="list-group-item">列表项4</li>
+            <li class="list-group-item">列表项5</li>
+            <li class="list-group-item">列表项6</li>
+        </ul>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            // 点击按钮时触发搜索功能
+            $('#searchBtn').click(function(){
+                var searchText = $('#searchInput').val().toLowerCase();
+                $('#listGroup li').filter(function(){
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
+                });
+            });
+            
+            // 在输入框中按下回车键时触发搜索功能
+            $('#searchInput').keypress(function(e){
+                if(e.which == 13){ // 回车键的键值为13
+                    $('#searchBtn').click(); // 触发搜索按钮的单击事件
+                }
+            });
+            
+            // 点击单个列表项时触发删除功能
+            $('#listGroup').on('click', 'li', function(){
+                $(this).remove();
+            });
+        });
+    </script>
+  </body>
+
+</html>

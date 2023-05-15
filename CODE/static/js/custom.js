@@ -176,7 +176,7 @@ function startDevNew(){
         type: "get",
         dataType: "text",
         headers: { 'from': '/newDev' },
-        data: JSON.stringify({"newDev": [devName, devType]}),
+        data: JSON.stringify({"devName":devName,"devType":devType}),
         contentType:"json/application",
         timeout:1500000,
         async: true,
@@ -214,5 +214,24 @@ function infoCard(){
     typeSelect.addEventListener("change", function() {
         var selectedValue = typeSelect.options[typeSelect.selectedIndex].value;
         detailedInfoElement.innerHTML = detailedInfo[parseInt(selectedValue)-1];
+    });
+}
+
+function searchUsers(){
+    $(document).ready(function(){
+        // 点击按钮时触发搜索功能
+        $('#searchBtn').click(function(){
+            var searchText = $('#searchInput').val().toLowerCase();
+            $('#info tr').filter(function(){
+                $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
+            });
+        });
+        
+        // 在输入框中按下回车键时触发搜索功能
+        $('#searchInput').keypress(function(e){
+            if(e.which == 13){ // 回车键的键值为13
+                $('#searchBtn').click(); // 触发搜索按钮的单击事件
+            }
+        });
     });
 }

@@ -67,14 +67,17 @@ def newDevice():
 @app.route('/startDev',methods=['GET','POST'])
 def startDev():
     page_url = request.headers.get('from')
-    data=list(request.args.to_dict().keys())[0]
-    data=json.loads(data)
-    if page_url=="chooseDev":
-        data=data['chooseDev']
-    elif page_url=="newDev":
-        data=data['newDev']
-    print(data)
-    msg="here"
+    raw_data=list(request.args.to_dict().keys())[0]
+    data=json.loads(raw_data)
+    if page_url=="/chooseDev":
+        devID=data['chooseDev']
+        print(devID)
+    elif page_url=="/newDev":
+        devName=data['devName']
+        devType=data['devType']
+        print(devName)
+        print(devType)
+    msg="here0000"
     return msg
 
 # 首页
@@ -141,7 +144,7 @@ def manageInfo():
     if session['loginState']==0:
         abort(403)
     # 列举所有学生信息
-    stuInfo = [['2020329621074','王旭刚'],['2020329621199','韦杨婧'],['2020329621229','刘俊伟']]
+    stuInfo = ctrl.get_users()
     return render_template(
         'manageInfo.html',
         stuInfo = stuInfo
