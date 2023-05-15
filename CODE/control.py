@@ -85,6 +85,9 @@ class control():
         
         return self.IP_PORT,client
         
+    def set_client_type(self,PORT,Type):
+        self.clientDict[PORT].Type=Type
+
     def del_client(self,PORT):
         self.recognition.del_client(PORT)
         del self.clientDict[PORT]
@@ -163,20 +166,44 @@ class control():
         valid = self.is_valid(userid)
         status = self.user_status[userid][0]
         client = self.clientDict[id]
+        tpye = client.get_type()
         client.msg = ""
 
-        if(not valid and status):
-            client.msg = f"{self.info[userid][0]}请勿重复签到"
-        elif(not valid and not status):
-            client.msg = f"{self.info[userid][0]}请勿重复签退"
-        elif(valid and status):
-            self.getout(userid)
-            client.msg = f"{self.info[userid][0]}签退成功"
-            time.sleep(3)
-        elif(valid and not status):
-            self.getin(userid)
-            client.msg = f"{self.info[userid][0]}签到成功"
-            time.sleep(3)
+        switch = {1: "签到签退", 2: "签到", 3: "签退"}
+
+        if tpye == 1:
+            if(not valid and status):
+                client.msg = f"{self.info[userid][0]}请勿重复签到"
+            elif(not valid and not status):
+                client.msg = f"{self.info[userid][0]}请勿重复签退"
+            elif(valid and status):
+                self.getout(userid)
+                client.msg = f"{self.info[userid][0]}签退成功"
+                time.sleep(3)
+            elif(valid and not status):
+                self.getin(userid)
+                client.msg = f"{self.info[userid][0]}签到成功"
+                time.sleep(3)
+
+        elif tpye == 2:
+            if(not valid and status):
+                client.msg = f"{self.info[userid][0]}请勿重复签到"
+            elif(valid and not status):
+                self.getin(userid)
+                client.msg = f"{self.info[userid][0]}签到成功"
+                time.sleep(3)
+            else:
+                client.msg = f"该设备只能进行{switch[tpye]}操作"
+
+        elif tpye == 3:
+            if(not valid and not status):
+                client.msg = f"{self.info[userid][0]}请勿重复签退"
+            elif(valid and status):
+                self.getout(userid)
+                client.msg = f"{self.info[userid][0]}签退成功"
+                time.sleep(3)
+            else:
+                client.msg = f"该设备只能进行{switch[tpye]}操作"
         return client.msg
 
     def adduser(self, name, email):
@@ -411,6 +438,9 @@ class control():
                 self.Type = Type
                 self.id = id
                 self.msg=""
+
+            def get_type(self):
+                return self.Type
 
             def get_msg(self):
                 return self.msg
