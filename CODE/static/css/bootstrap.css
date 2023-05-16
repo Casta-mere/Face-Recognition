@@ -1619,6 +1619,12 @@ pre code {
   color: #212529;
 }
 
+.table .newtable th{
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: none;
+}
+
 .table th,
 .table td {
   padding: 0.75rem;
