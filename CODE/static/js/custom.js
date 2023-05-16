@@ -102,10 +102,15 @@ function turnToDel() {
     // 遍历每一行
     for (var i = 0; i < rows.length-1; i++) {
         // 获取该行所有单元格
-        var cells = rows[i+1].querySelectorAll('td');
-        // 处理单元格的值
-        var cellValueID = cells[1].textContent || cells[1].innerText;
-        nData.push(cellValueID);
+        console.log(rows[i+1].getAttribute('class'))
+        console.log(rows[i+1])
+        if (rows[i+1].getAttribute('class') != null) {
+            var cells = rows[i+1].querySelectorAll('td');
+            // 处理单元格的值
+            var cellValueID = cells[1].textContent || cells[1].innerText;
+            console.log(rows[i+1])
+            nData.push(cellValueID);
+        }
     }
 
     var uploadAjax = $.ajax({
@@ -234,4 +239,16 @@ function searchUsers(){
             }
         });
     });
+}
+
+function select2del(){
+    $(function(){  
+        $("#info label").click(function() {
+            if($(this).closest('tr').hasClass('selected')){
+            $(this).closest('tr').removeClass('selected'); 
+            }else{
+            $(this).closest('tr').addClass('selected'); 
+            }
+        });
+    }); 
 }

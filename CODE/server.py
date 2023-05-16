@@ -50,10 +50,13 @@ def settings():
 
 @app.route('/chooseDev',methods=['GET','POST'])
 def chooseDevice():
+    dev_list = ctrl.get_devices()
+    # print(l)
     return render_template(
         'devSettings.html',
         who="chooseDev",
-        create=0
+        create=0,
+        devs=dev_list
         )
 
 @app.route('/newDev',methods=['GET','POST'])
@@ -70,14 +73,22 @@ def startDev():
     raw_data=list(request.args.to_dict().keys())[0]
     data=json.loads(raw_data)
     if page_url=="/chooseDev":
-        devID=data['chooseDev']
-        print(devID)
+        try:
+            devID=data['chooseDev']
+            ctrl.set_client_type_by_id(eval(session['port']),eval(devID))
+            msg="Success"
+        except Exception as e:
+            print(e)
+            msg="Error"
     elif page_url=="/newDev":
+        # try:
         devName=data['devName']
-        devType=data['devType']
-        print(devName)
-        print(devType)
-    msg="here0000"
+        devType=eval(data['devType'])
+        ctrl.set_client_type(eval(session['port']),devType)
+        msg="000"
+        # except Exception as e:
+            # print(e)
+        # msg="Error"
     return msg
 
 # 首页
@@ -158,7 +169,8 @@ def deleteInfo():
     name=list(request.args.to_dict().keys())[0]
     name=json.loads(name)
     name=name['delInfo']
-    # con,msg=ctrl.deleteuser(name)
+    print(name)
+    con,msg=ctrl.deleteuser(name)
     msg="here"
     return msg
 

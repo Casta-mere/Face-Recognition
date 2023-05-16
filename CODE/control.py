@@ -43,6 +43,7 @@ class control():
 
         self.load_info()
         self.renew_status()
+        self.load_devices()
         self.recognition = control.recognize(self.info, self)
         self.recognition.start()
     
@@ -88,6 +89,10 @@ class control():
         
     def set_client_type(self,PORT,Type):
         self.clientDict[PORT].Type=Type
+        
+    def set_client_type_by_id(self,PORT,id):
+        Type=self.devices[id][1]
+        self.clientDict[PORT].Type=Type+1
 
     def del_client(self,PORT):
         self.recognition.del_client(PORT)
@@ -120,7 +125,6 @@ class control():
         info = []
         for i in self.info.keys():
             info.append([i, self.info[i][0]])
-        print(info)
         return info
 
     def load_devices(self):
@@ -130,8 +134,10 @@ class control():
             self.devices[i[0]] = [i[1], i[2]]
     
     def get_devices(self):
-        print(self.devices)
-        return self.devices
+        l = []
+        for i in self.devices.keys():
+            l.append([i, self.devices[i][0], self.devices[i][1]])
+        return l
     
     def now_time(self):
         nowdate = time.strftime('%Y-%m-%d', time.localtime())

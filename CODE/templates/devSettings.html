@@ -47,11 +47,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for i in range(0,10)%}
+                                        {% for i in range(devs|length)%}
                                         <tr>
-                                            <td class="col-3" scope="col">000001</td>
-                                            <td class="col-3" scope="col">323前门</td>
-                                            <td class="col-3" scope="col">签到</td>
+                                            <td class="col-3" scope="col">{{devs[i][0]}}</td>
+                                            <td class="col-3" scope="col">{{devs[i][1]}}</td>
+                                            <td class="col-3" scope="col">{{devs[i][2]}}</td>
                                             <td class="col-3" scope="col">
                                                 <div class="btn-box1">
                                                     <!--之后把i+1换成设备的ID-->
@@ -92,15 +92,15 @@
                         <div id="type" name="type">
                             <select id="type-select" class="form-control" name="type">
                                 <option value=0>请选择设备类型</option>
-                                <option value=1>仅签到</option>
-                                <option value=2>仅签退</option>
-                                <option value=3>签到和签退</option>
+                                <option value=1>签到和签退</option>
+                                <option value=2>仅签到</option>
+                                <option value=3>仅签退</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-6 offset-3">
                         <div class="btn-box">
-                            <button onclick="startDevNew()"> 确认</button>
+                            <button onclick="startDevNew()">确认</button>
                             &emsp;&emsp;
                             <button onclick="turnBackInit()">返回</button>
                         </div>
