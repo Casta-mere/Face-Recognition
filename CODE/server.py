@@ -41,13 +41,9 @@ def hello_world():
     # app.app_context().push()
 
     # return redirect(url_for('home'))
-    return redirect(url_for('settings'))
+    return redirect(url_for('chooseDevice'))
 
 # 选择设备
-@app.route('/settings',methods=['GET','POST'])
-def settings():
-    return render_template('initialDev.html')
-
 @app.route('/chooseDev',methods=['GET','POST'])
 def chooseDevice():
     dev_list = ctrl.get_devices()
@@ -59,6 +55,7 @@ def chooseDevice():
         devs=dev_list
         )
 
+# 新建设备
 @app.route('/newDev',methods=['GET','POST'])
 def newDevice():
     return render_template(
@@ -67,6 +64,7 @@ def newDevice():
         create=1
         )
 
+# 配置设备
 @app.route('/startDev',methods=['GET','POST'])
 def startDev():
     page_url = request.headers.get('from')

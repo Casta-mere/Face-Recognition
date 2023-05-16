@@ -105,7 +105,17 @@ body {
   font-weight: bold;
 }
 
+.heading_container h4 {
+  position: relative;
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+
 .heading_container h2 span {
+  color: #44b89d;
+}
+
+.heading_container h4 span {
   color: #44b89d;
 }
 
