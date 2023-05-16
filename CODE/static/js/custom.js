@@ -102,10 +102,15 @@ function turnToDel() {
     // 遍历每一行
     for (var i = 0; i < rows.length-1; i++) {
         // 获取该行所有单元格
-        var cells = rows[i+1].querySelectorAll('td');
-        // 处理单元格的值
-        var cellValueID = cells[1].textContent || cells[1].innerText;
-        nData.push(cellValueID);
+        console.log(rows[i+1].getAttribute('class'))
+        console.log(rows[i+1])
+        if (rows[i+1].getAttribute('class') != null) {
+            var cells = rows[i+1].querySelectorAll('td');
+            // 处理单元格的值
+            var cellValueID = cells[1].textContent || cells[1].innerText;
+            console.log(rows[i+1])
+            nData.push(cellValueID);
+        }
     }
 
     var uploadAjax = $.ajax({
@@ -176,7 +181,7 @@ function startDevNew(){
         type: "get",
         dataType: "text",
         headers: { 'from': '/newDev' },
-        data: JSON.stringify({"newDev": [devName, devType]}),
+        data: JSON.stringify({"devName":devName,"devType":devType}),
         contentType:"json/application",
         timeout:1500000,
         async: true,
@@ -215,4 +220,35 @@ function infoCard(){
         var selectedValue = typeSelect.options[typeSelect.selectedIndex].value;
         detailedInfoElement.innerHTML = detailedInfo[parseInt(selectedValue)-1];
     });
+}
+
+function searchUsers(){
+    $(document).ready(function(){
+        // 点击按钮时触发搜索功能
+        $('#searchBtn').click(function(){
+            var searchText = $('#searchInput').val().toLowerCase();
+            $('#info tr').filter(function(){
+                $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
+            });
+        });
+        
+        // 在输入框中按下回车键时触发搜索功能
+        $('#searchInput').keypress(function(e){
+            if(e.which == 13){ // 回车键的键值为13
+                $('#searchBtn').click(); // 触发搜索按钮的单击事件
+            }
+        });
+    });
+}
+
+function select2del(){
+    $(function(){  
+        $("#info label").click(function() {
+            if($(this).closest('tr').hasClass('selected')){
+            $(this).closest('tr').removeClass('selected'); 
+            }else{
+            $(this).closest('tr').addClass('selected'); 
+            }
+        });
+    }); 
 }

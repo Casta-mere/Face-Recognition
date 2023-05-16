@@ -27,6 +27,16 @@
     <section class="contact_section layout_padding">
       <div class="container">
         <div class="row">
+          <div class="col-md-8">
+            <div class="form-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="输入搜索内容">
+            </div>
+          </div>
+          <div class="col-md-4">
+              <div class="form-group">
+                  <button type="button" id="searchBtn" class="btn pull-right">搜索</button>
+              </div>
+          </div>
           <div class="col-md-12 ">
             <form method="post">
                 <table id="tableDel" class="table table-hover" style="text-align:center;">
@@ -37,30 +47,22 @@
                         <th scope="col">姓名</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="info">
+                      {%for i in range(stuInfo|length)%}
                       <tr>
                         <td class="col-2"> 
                           <div class="custom-control custom-checkbox"> 
-                            <input class="custom-control-input" type="checkbox" name="exampleCheckboxs" id="exampleCheckboxs1" value="option1"> 
-                            <label class="custom-control-label" for="exampleCheckboxs1"></label> 
+                            <input class="custom-control-input" type="checkbox" name="exampleCheckboxs" id="exampleCheckboxs{{i+1}}" value="option{{i+1}}"> 
+                            <label class="custom-control-label" for="exampleCheckboxs{{i+1}}"></label> 
                           </div> 
                         </td>
-                        <td class="col-5" scope="col">000001</td>
-                        <td class="col-5" scope="col">签到</td>
+                        <td class="col-5" scope="col">{{stuInfo[i][0]}}</td>
+                        <td class="col-5" scope="col">{{stuInfo[i][1]}}</td>
                       </tr>
-                      <tr>
-                        <td class="col-2"> 
-                          <div class="custom-control custom-checkbox"> 
-                            <input class="custom-control-input" type="checkbox" name="exampleCheckboxs" id="exampleCheckboxs2" value="option2"> 
-                            <label class="custom-control-label" for="exampleCheckboxs2"></label> 
-                          </div> 
-                        </td>
-                        <td class="col-5" scope="col">000001</td>
-                        <td class="col-5" scope="col">签到</td>
-                      </tr>
+                      {%endfor%}
                     </tbody>
                 </table>
-            </form>
+              </form>
               <div>
                 <br><br>
                 <h3 id="waitDel" class="m-auto"></h3>
@@ -76,9 +78,11 @@
       </div>
     </section>
 
-    <script src="static/js/jquery-3.4.1.min.js"></script>
-    <script src="static/js/bootstrap.js"></script>
-    <script src="static/js/custom.js"></script>
+    <script src="/static/js/jquery-3.4.1.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script >searchUsers();</script>
+    <script>select2del();</script>
 
   </body>
 
