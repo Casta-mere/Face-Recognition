@@ -28,14 +28,16 @@
                 <div class="row">
                     <div class="col-md-4 ">
                         <div class="heading_container ">
-                            <h2 class="">请输入管理员密码</h2>
+                            <h4 class="">请输入管理员密码</h4>
                         </div>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <form action="/loginCheck" method="post">
                             <div id="password" name="password">
-                                <div class="col-md-8">
+                                <div class="col-md-9">
                                     <input id="password" name="password" value="{{password}}" type="password" placeholder="密码" />
+                                </div>
+                                <div class="col-md-3">
                                     <div class="btn-box">
                                         <a href="/loginCheck">
                                             <button>登录</button>

@@ -208,7 +208,7 @@ function turnBack() {
 }
 
 function turnBackInit() {
-    window.location.href = "/settings";
+    window.location.href = "/chooseDev";
 }
 
 function infoCard(){
