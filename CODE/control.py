@@ -92,7 +92,7 @@ class control():
         
     def set_client_type_by_id(self,PORT,id):
         Type=self.devices[id][1]
-        self.clientDict[PORT].Type=Type+1
+        self.clientDict[PORT].Type=Type
 
     def del_client(self,PORT):
         self.recognition.del_client(PORT)
@@ -136,7 +136,14 @@ class control():
     def get_devices(self):
         l = []
         for i in self.devices.keys():
-            l.append([i, self.devices[i][0], self.devices[i][1]])
+            tpye=""
+            if(self.devices[i][1]==1):
+                type = "签到/签退"
+            elif(self.devices[i][1]==2):
+                type = "签到"
+            elif(self.devices[i][1]==3):
+                type = "签退"
+            l.append([i, self.devices[i][0],type ])
         return l
     
     def now_time(self):
@@ -194,7 +201,6 @@ class control():
         client.msg = ""
 
         switch = {1: "签到签退", 2: "签到", 3: "签退"}
-
         if tpye == 1:
             if(not valid and status):
                 client.msg = f"{self.info[userid][0]}请勿重复签到"
@@ -230,12 +236,9 @@ class control():
                 client.msg = f"该设备只能进行{switch[tpye]}操作"
         return client.msg
 
-    def adduser(self, name, email):
-        # userid 为空闲的最小id
-        userid = 1
-        while(userid in self.info.keys()):
-            userid += 1
-
+    def adduser(self, name, userid):
+        userid = eval(userid)
+        email = "default@qq.com"
         try:
             self.recognition.stop()
 
@@ -257,8 +260,8 @@ class control():
             msg = f"SUCCESS : 新用户{name}添加成功"
             return True, msg
 
-        except:
-            msg = f"ERROR IN {sys._getframe().f_code.co_name}"
+        except Exception as e:
+            msg = f"ERROR : IN {sys._getframe().f_code.co_name} Exception : {e}"
             self.log.log(msg)
             return False, msg
 

@@ -179,9 +179,9 @@ def reset():
     colunm_device.append(['tpye', 'tinyint(1)'])
     
     # 0: in, 1: out, 2: in&out
-    device1 = [1, '10-409前门外', 0]
-    device3 = [2, '10-409前门内', 1]
-    device2 = [3, '10-409后门', 2]
+    device1 = [1, '10-409前门外', 2]
+    device3 = [2, '10-409前门内', 3]
+    device2 = [3, '10-409后门', 1]
 
     db = my_sql("facerecognition")
     print(db.boot_selftest())
